@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.giftcard.label.dao.GiftCardLabelDao">
+
+	<sql id="label">
+		id,name,image,description,creatorId,createdTime,lastModifierId,
+		lastModifiedTime,deletedFlag,version
+	</sql>
+
+	<!-- 礼卡标签查询条件+分页 -->
+
+	<select id="selectLabelPage" parameterType="com.topaiebiz.giftcard.label.dto.CardLabelDto"
+		resultType="com.topaiebiz.giftcard.label.entity.CardLabelEntity">
+		SELECT
+		<include refid="label" />
+		FROM t_gif_giftcard_label WHERE deletedFlag=0
+		<if test="!(name==null or name=='')">
+			AND name=#{name}
+		</if>
+		ORDER BY id DESC
+
+	</select>
+
+
+	<!-- 礼卡标签信息的批删 -->
+
+	<update id="deleteLabelOfBeach">
+	      <![CDATA[ 
+       UPDATE  t_gif_giftcard_label SET deletedFlag=1 WHERE id IN
+          ]]>
+		<foreach collection="array" item="label" open="(" separator=","
+			close=")">
+			#{label}
+		</foreach>
+	</update>
+
+	<!-- 根据礼卡标签名称查询礼卡标签信息对象 -->
+
+	<select id="selectByName" parameterType="com.topaiebiz.giftcard.label.entity.CardLabelEntity"
+		resultType="com.topaiebiz.giftcard.label.entity.CardLabelEntity">
+		SELECT
+		<include refid="label" />
+		FROM t_gif_giftcard_label WHERE name=#{name} 
+		<if test="id != null">
+		AND id != #{id}
+		</if>
+		
+	</select>
+	
+	<!-- 判断此礼卡标签是否已经存在于已创建的礼卡中 -->
+   <select id="selectCardInfoByLabelId" resultType="com.topaiebiz.giftcard.manage.dto.GiftCardInfoDto">
+       SELECT name FROM t_gif_giftcard_info WHERE cardLabel IN
+       <foreach collection="array" item="label" open="(" separator=","
+			close=")">
+			#{label}
+		</foreach>
+   </select>
+</mapper>

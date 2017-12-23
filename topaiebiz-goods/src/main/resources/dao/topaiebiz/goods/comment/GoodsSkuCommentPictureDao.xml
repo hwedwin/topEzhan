@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.comment.dao.GoodsSkuCommentPictureDao">
+  	
+  	<!-- 查询商品sku图片信息 -->
+  	<select id="selectGoodsSkuCommentPicture" resultType="com.topaiebiz.goods.comment.entity.GoodsSkuCommentPictureEntity">
+  		SELECT id FROM t_goo_goods_sku_comment_picture 
+  		WHERE commentId = #{commentId} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 查询商品sku图片信息 -->
+  	<select id="selectGoodsSkuCommentPictureDto" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentPictureDto">
+  		SELECT id,image,description FROM t_goo_goods_sku_comment_picture 
+  		WHERE commentId = #{commentId} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 删除商品sku图片信息 -->
+  	<update id="deleteGoodsSkuCommentPicture">
+  		UPDATE  t_goo_goods_sku_comment_picture 
+  		SET deletedFlag = 1 WHERE id = #{id}
+  	</update>
+	
+</mapper>

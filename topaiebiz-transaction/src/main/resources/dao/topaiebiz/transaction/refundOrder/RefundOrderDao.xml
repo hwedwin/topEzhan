@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.refundOrder.dao.RefundOrderDao">
+
+	<select id = "getRefundOrderList" resultType="com.topaiebiz.transaction.refundOrder.dto.RefundOrderDto">
+	SELECT
+		o.id,
+		i.name as storeName,
+		mi.name as merchantName,
+		m.nickName as memberName,
+		o.totalPrice,
+		ta.cardPrice as refundCardPrice,
+		ta.usageScore as refundUsageScore,
+		o.createdTime,
+		o.state,
+		o.lastModifiedTime,
+		s.id as storeId,
+		s.orderType as storeOrderType
+	FROM
+		t_tsa_refund_order o
+	LEFT JOIN t_mem_member m ON o.memberId = m.id
+	LEFT JOIN t_tsa_total_order ta ON o.platformOrderNo = ta.id
+	LEFT JOIN t_tsa_store_order s ON o.storeOrderId = s.id
+	LEFT JOIN t_mer_store_info i ON o.storeId = i.id
+	LEFT JOIN t_mer_merchant_info mi ON i.merchantId = mi.id
+	WHERE o.deletedFlag = 0
+		<if test="!(id==null or id=='')">
+			AND o.id = #{id}
+		</if>
+		<if test="!(returnType==null or returnType=='')">
+			AND o.returnType = #{returnType}
+		</if>
+		<if test="!(state==null or state=='')">
+			AND o.state = #{state}
+		</if>
+		<if test="!(storeOrderType==null or storeOrderType=='')">
+			AND s.orderType = #{storeOrderType}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND o.storeId = #{storeId}
+		</if>
+		<if test="!(memberId==null or memberId=='')">
+			AND o.memberId = #{memberId}
+		</if>
+		ORDER BY o.createdTime DESC
+	</select>
+
+
+	<select id="getRefundOrderListInPC" resultType="com.topaiebiz.transaction.refundOrder.dto.PCRefundOrderListDto">
+
+        SELECT * FROM t_tsa_refund_order AS ttro
+        WHERE ttro.deletedFlag = 0
+        <if test="">
+        </if>
+
+    </select>
+
+    <!-- APP端获取退货退款列表 -->
+    <select id="getRefundOrderListInAPP" resultType="com.topaiebiz.transaction.refundOrder.dto.APPRefundOrderListDto">
+        SELECT
+        ttro.id AS id,
+        ttro.storeId AS storeId,
+        ttro.memberId AS memberId,
+        ttro.storeOrderId AS storeOrderId,
+        ttro.reason AS reason,
+        ttro.state AS state,
+        ttro.returnType AS returnType,
+        ttro.image1 AS image1,
+        ttro.image2 AS image2,
+        ttro.image3 AS image3,
+        ttro.image4 AS image4,
+        ttro.totalPrice AS totalPrice,
+        ttro.createdTime AS orderTime,
+        ttso.actualFreight AS actualFreight
+        FROM t_tsa_refund_order AS ttro
+        LEFT JOIN t_tsa_store_order AS ttso ON ttso.id = ttro.storeOrderId
+        WHERE ttro.deletedFlag = 0
+        AND ttro.memberId = #{memberId}
+        ORDER BY ttro.createdTime DESC, ttro.lastModifiedTime DESC
+    </select>
+
+	<select id="findRefundOrderByStoreOrderId" resultType="com.topaiebiz.transaction.refundOrder.entity.RefundOrderEntity">
+		SELECT * FROM t_tsa_refund_order AS ttro WHERE ttro.storeOrderId = #{storeOrderId} AND ttro.deletedFlag = 0
+	</select>
+
+</mapper>

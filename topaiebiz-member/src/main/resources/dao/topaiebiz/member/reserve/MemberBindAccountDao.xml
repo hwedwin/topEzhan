@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.reserve.dao.MemberBindAccountDao">
+
+    <select id="findOneByMemberIdAndAccountType" resultType="com.topaiebiz.member.reserve.entity.MemberBindAccountEntity">
+        SELECT * FROM t_mem_member_bind_account WHERE deletedFlag = 0 And memberId = #{memberId} AND accountType = #{accountType}
+    </select>
+
+    <select id="findOneByOpenIdInWechat" resultType="com.topaiebiz.member.reserve.entity.MemberBindAccountEntity">
+        SELECT * FROM t_mem_member_bind_account WHERE deletedFlag = 0 And platformAccount = #{openId} AND accountType = 1;
+    </select>
+
+    <select id="findOneByMemberInWechat" resultType="com.topaiebiz.member.reserve.entity.MemberBindAccountEntity">
+        SELECT * FROM t_mem_member_bind_account WHERE deletedFlag = 0 And memberId = #{memberId} AND accountType = 1;
+    </select>
+
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.decorate.dao.CollocateTypeDao">
+	
+	<!-- 根据单号查询快递信息 -->
+	<select id="selectBydecTypeAndTeleplate" resultType="com.topaiebiz.decorate.entity.CollocateTypeEntity">
+		SELECT
+			id,storeId,templateId,decType,title,memo,createdTime,creatorId,lastModifierId,lastModifiedTime,deletedFlag,
+			version,iconImage
+		FROM
+			t_dec_collocate_type
+	    WHERE 
+	    	storeId=#{storeId} and templateId=#{templateId} and decType=#{decType} and deletedFlag=0
+	</select>
+	
+	<select id="selectListCollocate" resultType="com.topaiebiz.decorate.dto.CollocateDto">
+		SELECT
+			id,storeId,templateId,decType,title,iconImage,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+		FROM	
+			t_dec_collocate_type
+		WHERE
+			deletedFlag=0 AND templateId=#{templateId} AND decType=#{decType} AND storeId=#{storeId} 
+	</select>
+
+</mapper>

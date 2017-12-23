@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.cart.dao.ShoppingCartDao">
+  
+    <!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+	
+	<!-- 根据会员id查询购物车中的列表详细信息 -->
+	<select id="selectGoodsCart" resultType="com.topaiebiz.transaction.cart.dto.ShoppingCartDto">
+		SELECT 
+		pc.id,pc.memberId,pc.goodsId AS goodsSkuId,pc.goodsNum,pc.memo,pc.createdTime,pc.deletedFlag,
+		pi.id AS goodsMainId,pi.itemCode,pi.name,pi.defaultPrice,pi.belongStore,pi.belongBrand,
+		pi.belongCategory,pi.status,pi.logisticsId,pi.description,
+		pa.baseFieldValue,pa.saleFieldValue,pa.saleImage,pa.price,pa.stockNumber,
+		pa.articleNumber,pa.barCode,
+		mi.typeId,mi.gradeId,mi.userName,mi.districtId,mi.address,mi.upgradeScore,mi.accountState,
+		si.merchantId,si.name AS storeName
+		FROM t_tsa_shopping_cart pc
+		LEFT JOIN t_goo_goods_sku pa ON pc.goodsId=pa.id
+		LEFT JOIN t_mem_member mi ON pc.memberId=mi.id
+		LEFT JOIN t_goo_item pi ON pa.itemId=pi.id
+		LEFT JOIN t_mer_store_info si ON pi.belongStore=si.id
+		<where>
+		1=1
+			<if test="memberId!=null">
+				AND pc.memberId = #{memberId}
+			</if>
+			<if test="belongStore!=null">
+				AND si.id = #{belongStore}
+			</if>
+		</where>
+		ORDER BY pc.createdTime DESC
+	</select>
+	
+	<!-- 查询的购物车中按店铺分 -->
+	<select id="selectStore" resultType="com.topaiebiz.transaction.cart.dto.CardStoreListDto">
+		SELECT
+			t1.id,
+			t1.merchantId,
+			t1.storeName,
+			t1.belongStore
+		FROM
+			(
+				SELECT
+					si.id,
+					pc.memberId,
+					si.merchantId,
+					si.name AS storeName,
+					pi.belongStore
+				FROM
+					t_tsa_shopping_cart pc
+				LEFT JOIN t_goo_goods_sku pa ON pc.goodsId = pa.id
+				LEFT JOIN t_goo_item pi ON pa.itemId = pi.id
+				LEFT JOIN t_mer_store_info si ON pi.belongStore = si.id
+				<where>
+					<if test="memberId!=null"> 
+						pc.memberId = #{memberId}
+					</if>
+				</where>
+				ORDER BY
+					pc.createdTime DESC
+			) t1
+		GROUP BY
+			t1.id,
+			t1.belongStore
+	</select>
+	
+	<!-- 根据会员id，sku最小单元商品id，查询当前会员购物车中是否存在此商品 -->
+	<select id="selectByMemberSkuId" resultType="com.topaiebiz.transaction.cart.entity.ShoppingCartEntity">
+		SELECT id,memberId,goodsId,goodsNum,version
+		FROM t_tsa_shopping_cart WHERE memberId = #{memberId} 
+		AND goodsId = #{goodsId} AND deletedFlag = 0
+	</select>
+	
+	<!-- 在购物车中修改对应商品的数量 -->
+	<update id="updateGoodsCartNum" parameterType="com.topaiebiz.transaction.cart.dto.ModifyShoppingCartDto">
+		UPDATE t_tsa_shopping_cart pc
+		SET 
+		pc.goodsNum = #{goodsNum}
+		<where>
+			1=1
+			<if test="id!=null">
+				AND pc.id = #{id}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 商品加入购物车时，如果已存在修改对应的数量 -->
+	<update id="updateGoodsNum" parameterType="com.topaiebiz.transaction.cart.entity.ShoppingCartEntity">
+		UPDATE t_tsa_shopping_cart pc
+		SET 
+		pc.goodsNum = #{goodsNum}
+		<where>
+			1=1
+			<if test="memberId!=null">
+				AND pc.memberId = #{memberId}
+			</if>
+			<if test="goodsId!=null">
+				AND pc.goodsId = #{goodsId}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 根据id删除购物车中指定的商品 -->
+	<update id="deleteGoodsCart">
+		UPDATE t_tsa_shopping_cart SET deletedFlag = 1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<!-- 根据id删除购物车中指定的商品 -->
+	<update id="deleteGoodsCartById">
+		UPDATE t_tsa_shopping_cart SET deletedFlag = 1 WHERE id = #{id}
+	</update>
+	
+	<select id="selectMemberCardDto" resultType="com.topaiebiz.transaction.cart.dto.MemberCardDto">
+		SELECT 
+		cd.id,cd.cardId,cd.cardNo,cd.orderId,cd.password,cd.expirationTime,cd.telephone,
+		cd.downloadPassword,cd.usedOrder,cd.selfState,cd.memberId,cd.activeTime,
+		cd.mainCardId,cd.balance,cd.value,cd.price,cd.cardState,cd.memo,cd.creatorId,
+		cd.createdTime,cd.lastModifiedTime,cd.deletedFlag,cd.version,
+		ci.id AS infoId,ci.cardMedium AS infoCardMedium,ci.cardLabel AS infoCardLabel,
+		ci.cardType AS infoCardType,ci.isVice AS infoIsVice,ci.mainCardId AS infoMainCardId,
+		ci.isCustom AS infoIsCustom,ci.name AS infoName,ci.prefix AS infoPrefix,
+		ci.value AS infoValue,ci.price AS infoPrice,ci.platformPrice AS infoPlatformPrice,
+		ci.storePrice AS infoStorePrice,ci.brandPrice AS infoBrandPrice,
+		ci.rangeType AS infoRangeType,ci.storeId AS infoStoreId,ci.brandId AS infoBrandId,
+		ci.approver AS infoApprover,ci.minPrice AS infoMinPrice,ci.maxPrice AS infoMaxPrice,
+		ci.totalNum AS infoTotalNum,ci.surplusNum AS infoSurplusNum,
+		ci.expirationTime AS infoExpirationTime,ci.banMemberNo AS infoBanMemberNo,
+		ci.saleTime AS infoSaleTime,ci.state AS infoState,ci.image AS infoImage,
+		ci.memo AS infoMemo,ci.creatorId AS infoCreatorId,ci.createdTime AS infoCreatedTime,
+		ci.lastModifiedTime AS infoLastModifiedTime,
+		ci.deletedFlag AS infoDeletedFlag,ci.version AS infoVersion
+		FROM t_gif_giftcard_detail cd
+		LEFT JOIN t_gif_giftcard_info ci ON cd.cardId=ci.id
+		LEFT JOIN t_mem_member_giftcard mc ON cd.memberId=mc.memberId
+		<where>
+			ci.expirationTime > now()
+			AND mc.state=1
+			<if test="memberId!=null">
+				AND cd.memberId = #{memberId}
+			</if>
+		</where>
+		ORDER BY ci.expirationTime DESC;
+	</select>
+	
+	<!-- 指定多表多个字段根据订单id查询 -->
+	<select id="selectStoreFreightInfoDto" resultType="com.topaiebiz.transaction.cart.dto.StoreFreightInfoDto">
+		SELECT
+		sfd.id,sfd.type,sfd.districtIdList,sfd.firstPrice,sfd.firstNum,sfd.addPrice,
+		sfd.addNum,sfd.isDefault,sfd.memo,sfd.creatorId,sfd.createdTime,
+		sfd.lastModifiedTime,sfd.deletedFlag,sfd.version,
+		sfi.id as infoId,sfi.storeId,sfi.freightName,sfi.isDefault as infoIsDefault,sfi.pricing,
+		sfi.memo as infoMemo,sfi.creatorId as infoCreatorId,sfi.createdTime as infoCreatedTime,
+		sfi.onlyThis,
+		sfi.lastModifiedTime as infoLastModifiedTime,sfi.deletedFlag as infoDeletedFlag,
+		sfi.version as infoVersion
+		FROM t_mer_store_freight_detail sfd 
+		LEFT JOIN t_mer_store_freight sfi ON sfi.id=sfd.freightId 
+ 		WHERE sfi.id=#{infoId}
+	</select>
+	
+	<!-- 根据会员编号获取购物车中的有效商品编号 -->
+	<select id = "getGoodsIdList" resultType="com.topaiebiz.transaction.cart.dto.ShoppingCartDto">
+		SELECT
+		c.goodsId
+		FROM
+		t_tsa_shopping_cart c
+		LEFT JOIN t_goo_goods_sku g ON c.goodsId = g.id
+		LEFT JOIN t_goo_item i ON g.itemId = i.id WHERE i.`status` =2
+	
+		<if test="memberId!=null">
+			AND c.memberId = #{memberId}
+		</if>
+	</select>
+	
+	<!-- app端根据会员id和商品id查询购物车商品 -->
+	<select id="selectShoppingCartByItemIds" resultType="com.topaiebiz.transaction.cart.entity.ShoppingCartEntity">
+		SELECT id from t_tsa_shopping_cart WHERE memberId = #{memberId}
+		AND goodsId in(select gs.id from t_goo_item gi ,t_goo_goods_sku gs
+		where gi.id = gs.itemId AND gi.id =#{itemId}
+		AND gi.deletedFlag = 0  AND gs.deletedFlag = 0 )
+	</select>
+
+	<select id="getByMemberIdAndSkuId" resultType="com.topaiebiz.transaction.cart.entity.ShoppingCartEntity">
+		select * FROM t_tsa_shopping_cart WHERE memberId = #{memberId} AND goodsId = #{goodsId} AND deletedFlag = 0
+	</select>
+
+</mapper>

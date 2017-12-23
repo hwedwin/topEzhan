@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.point.dao.MemberPointDao">
+	
+	<!-- 查询会员总积分 -->
+	<select id="selectMemberPointSum" resultType="com.topaiebiz.member.point.dto.MemberPointLogDto" parameterType="Long">
+		SELECT SUM(gainScore) gainScore FROM t_mem_member_point_log WHERE memberId = #{memberId};
+	</select>
+	
+	<!-- 查询会员积分记录 -->
+	<select id="selectMemberPointLog" resultType="com.topaiebiz.member.point.dto.MemberPointLogDto" parameterType="Long">
+		SELECT name,b.createdTime,b.gainScore FROM t_mem_member_point_rule a LEFT JOIN t_mem_member_point_log b ON a.type=b.gainType WHERE memberId=#{memberId};
+	</select>
+	
+	<!-- 判断新用户注册是否获取积分 -->
+	<select id="selectByGainType1" parameterType="com.topaiebiz.member.point.entity.MemberPointLogEntity" resultType="com.topaiebiz.member.point.entity.MemberPointLogEntity">
+	 SELECT gainType FROM t_mem_member_point_log WHERE memberId=#{memberId} AND gainType=#{gainType};
+	</select>
+	
+	<!-- 判断用户今天是否已经签到 -->
+	<select id="selectByGainType2" parameterType="com.topaiebiz.member.point.entity.MemberPointLogEntity" resultType="com.topaiebiz.member.point.entity.MemberPointLogEntity">
+	SELECT gainType,createdTime FROM t_mem_member_point_log WHERE memberId=#{memberId} AND gainType=#{gainType} ORDER BY createdTime;
+	</select>
+	
+	<!-- 退还会员积分-->
+	<select id="returnMemberPointLog" resultType="com.topaiebiz.member.point.dto.MemberPointLogDto" parameterType="com.topaiebiz.member.point.dto.MemberPointLogDto">
+		SELECT id,memberId,gainType,orderId,costMoney,gainScore FROM t_mem_member_point_log WHERE memberId=#{memberId} AND orderId=#{orderId};
+	</select>
+</mapper>

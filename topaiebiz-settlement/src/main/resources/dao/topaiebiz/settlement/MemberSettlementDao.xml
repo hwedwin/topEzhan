@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.settlement.member.dao.MemeberSettlementDao">
+
+
+	<!-- 平台端会员分销结算分页列表搜索。 -->
+	<select id="selectPlatMemberSettlementList"
+		resultType="com.topaiebiz.settlement.member.dto.MemberSettlementDto">
+		SELECT
+		mm.userName memberName,
+		mi.name merchantName,
+		si.name
+		storeName,
+		sms.totalSum,
+		sms.allowWithdrawalSum,
+		sms.notWithdrawalSum,
+		sms.yetWithdrawalSum,
+		sms.status,
+		sms.memberId AS memberId,
+		sms.platformCommission,
+		sms.paymentChannelCommission
+		FROM
+		t_mem_member mm
+		INNER JOIN t_set_member_settlement sms ON mm.id =
+		sms.memberId
+		INNER
+		JOIN t_mer_merchant_info mi ON mi.id = mm.merchantId
+		<if test="!(merchantName== null || merchantName == '')">
+			AND mi.name = #{merchantName}
+		</if>
+		INNER JOIN t_mer_store_info si ON si.id = mm.storeId
+		<if test="!(storeName == null || storeName == '')">
+			AND si.name = #{storeName}
+		</if>
+	</select>
+
+	<!-- 根据会员id查询上级会员信息 -->
+	<select id="selectParentNameByMemberId" resultType="String">
+		SELECT
+		id,userName AS parentName,parentId
+		FROM t_mem_member
+		WHERE parentId =
+		#{memberId} AND deletedFlag = 0
+	</select>
+
+	<!-- 商家端会员分销结算列表分页 -->
+	<select id="selectMerchantMemberSettlementList"
+		resultType="com.topaiebiz.settlement.member.dto.MemberSettlementDto">
+		SELECT
+		mm.userName AS memberName,
+		sms.totalSum AS totalSum,
+		sms.status,
+		sms.allowWithdrawalSum AS allowWithdrawalSum,
+		sms.notWithdrawalSum AS
+		notWithdrawalSum,
+		sms.yetWithdrawalSum AS yetWithdrawalSum,
+		sms.memberId AS memberId,
+		sms.platformCommission,
+		sms.paymentChannelCommission
+		FROM
+		t_mem_member mm
+		INNER JOIN
+		t_set_member_settlement sms ON mm.id = sms.memberId AND mm.merchantId
+		= #{merchantId}
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+	</select>
+
+	<!--平台端会员分销结算分页列表搜索根据会员id。 -->
+	<select id="selectPlatMemberSettlementListByMemberId"
+		resultType="com.topaiebiz.settlement.member.dto.MemberSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttso.memberId
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.memberId = #{memberId} AND
+		ttso.orderType = 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+	</select>
+
+	<!-- 商家端会员分销结算分页列表加分页加搜索根据会员id。 -->
+	<select id="selectMerchantMemberSettlementListByMemberId"
+		resultType="com.topaiebiz.settlement.member.dto.MemberSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttso.memberId
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.memberId = #{memberId} AND
+		ttso.orderType = 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+
+
+	</select>
+</mapper>

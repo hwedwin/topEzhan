@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.grade.dao.MemberGradeDao">
+	
+	<!-- 对会员名称进行重复验证  -->
+	<select id="selectMemberGradeByName" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+	  	SELECT name FROM t_mem_member_grade WHERE name = #{name} AND deletedFlag = 0 AND storeId = #{storeId};
+	</select>
+	
+	<!-- 对会员名称进行重复验证  -->
+	<select id="selectMemberGradeByNames" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+	  	SELECT name FROM t_mem_member_grade WHERE name = #{name} AND deletedFlag = 0 AND storeId = #{storeId} AND id != #{id};
+	</select>
+	
+	<!--  对会员编号进行重复验证   -->
+	<select id="selectMemberGradeByCodes" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+	  	SELECT gradeCode FROM t_mem_member_grade WHERE gradeCode = #{gradeCode} AND deletedFlag = 0 AND id!=#{id};
+	</select>
+	
+		<!-- 获取会员等级列表    -->
+	<select id="selectListOfMemberGrade" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+		SELECT id,name FROM t_mem_member_grade WHERE deletedFlag = 0;
+	</select>
+	
+	<!-- 会员等级分页加列表加查询  -->
+	<select id="selectPageMemberGrade" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+		SELECT id,name,smallIcon,needScore,description FROM t_mem_member_grade
+  		WHERE deletedFlag = 0 AND storeId = #{storeId}
+  		<if test="!(name==null or name=='')">
+  			AND name = #{name}
+  		</if>
+  		<if test="!(gradeCode==null or gradeCode=='')">
+  			AND gradeCode = #{gradeCode}
+  		</if>
+  		<if test="!(createdTime==null or createdTime=='')">
+  			AND createdTime = #{createdTime}
+  		</if>
+  		<if test="!(needScore==null or needScore=='')">
+  			AND needScore = #{needScore}
+  		</if>
+	</select>
+	
+	<!--  通过ID查询对象是否存在 -->
+	<select id="selectMemberGradeById" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+  		SELECT id,gradeCode,name,smallIcon,bigIcon,needScore,description,description FROM t_mem_member_grade
+  		WHERE id=#{id} and deletedFlag = 0;
+  	</select>
+	
+	<!--  批量删除会员等级 (修改状态) -->
+	<update id="deleteMemberGrades" parameterType="Long">
+		UPDATE t_mem_member_grade SET deletedFlag = 1 WHERE id IN 
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+	</update>
+	
+	<!-- 会员等级配置特权   -->
+	<insert id="insertMemberGradePrivilege" parameterType="com.topaiebiz.member.grade.entity.MemberGradePrivilegeEntity">
+		INSERT INTO t_mem_member_grade_privilege
+		(id,gradeId,privilegeType,isSettle,privilegeValue,settleRatio,memo
+		,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version) VALUES
+		(#{id},#{gradeId},#{privilegeType},#{isSettle},#{privilegeValue},#{settleRatio}
+		,#{memo},#{creatorId},now(),#{lastModifierId},#{lastModifiedTime},#{deletedFlag},#{version});
+	</insert>
+	
+	<!-- 通过会员编码查询对象成长值 -->
+	<select id="selectMemberGradeBygradeCode" parameterType="com.topaiebiz.member.grade.dto.MemberGradeDto" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+	SELECT id,gradeCode,name,smallIcon,bigIcon,needScore,description FROM t_mem_member_grade
+  		WHERE gradeCode=#{gradeCode} AND deletedFlag = 0 AND storeId = #{storeId};
+	</select>
+	
+	<!-- 查询最大ID所对应的编码值-->
+	<select id="selectMemberGradeByMaxGradeCode" resultType="com.topaiebiz.member.grade.entity.MemberGradeEntity">
+		SELECT gradeCode FROM t_mem_member_grade WHERE id IN (SELECT MAX(id) FROM t_mem_member_grade WHERE storeId = #{storeId} AND deletedFlag=0);
+	</select>
+</mapper>

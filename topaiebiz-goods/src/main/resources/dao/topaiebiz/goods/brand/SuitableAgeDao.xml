@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.brand.dao.SuitableAgeDao">
+
+	<!-- pc端查看年龄段列表 -->
+	<select id="selectListSuitableAge" resultType="com.topaiebiz.goods.brand.dto.SuitableAgeDto">
+		SELECT id,ageGroup,ageImage FROM
+		t_goo_suitable_age WHERE deletedFlag = 0
+	</select>
+	
+	<!-- app端查看年龄段列表 -->
+	<select id="selectAppListSuitableAge" resultType="com.topaiebiz.goods.brand.dto.SuitableAgeDto">
+		SELECT id,ageGroup,ageImage FROM
+		t_goo_suitable_age WHERE deletedFlag = 0 AND
+		ageGroup != '其他'
+	</select>
+
+</mapper>

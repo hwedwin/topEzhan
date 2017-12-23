@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.payment.order.moble.dao.MobleStoreOrderDao">
+
+	<select id="selectStoreOrderByStatistics" resultType="com.topaiebiz.transaction.order.merchant.entity.StoreOrderEntity">
+		SELECT ttso.id, ttso.orderType, ttso.memberId, ttso.storeId, ttso.orderTime, ttso.orderState, ttso.invoiceState, ttso.checkTime, 
+		ttso.deliveryType, ttso.productTotal, ttso.totalFreight, ttso.freightPromotion, ttso.actualFreight, ttso.orderTotal, ttso.usedPromotion, 
+		ttso.storeDeduction, ttso.lastPrice, ttso.totalOrderNo, ttso.memo, ttso.createdTime, ttso.deletedFlag FROM t_tsa_store_order as ttso 
+ 		where ttso.deletedFlag = 0 
+ 		<if test="orderStroeType > 0">
+			AND ttso.orderType = #{orderStroeType}
+		</if>
+ 		<if test="days > 0">
+ 			AND DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+ 		</if>
+       <if test="!(beforDate==null or beforDate=='')">
+			AND ttso.createdTime &gt;= STR_TO_DATE(#{beforDate},'%Y-%m-%d')
+		</if>
+		<if test="!(afterDate==null or afterDate=='')">
+			AND ttso.createdTime &lt;= STR_TO_DATE(#{afterDate},'%Y-%m-%d')
+		</if>
+	</select>
+
+
+
+
+
+</mapper>

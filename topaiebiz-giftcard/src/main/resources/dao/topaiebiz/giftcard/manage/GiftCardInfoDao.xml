@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.giftcard.manage.dao.GiftCardInfoDao">
+
+	<sql id="label">
+		id,name,image,description,creatorId,createdTime,lastModifierId,
+		lastModifiedTime,deletedFlag,version
+	</sql>
+
+	<sql id="media">
+		id,name,description,creatorId,createdTime,
+		lastModifierId,lastModifiedTime,deletedFlag,version
+	</sql>
+
+	<sql id="type">
+		id,name,description,creatorId,createdTime,lastModifierId,
+		lastModifiedTime,deletedFlag,version
+	</sql>
+
+	<sql id="info">
+		id,cardMedium,cardLabel,cardType, isVice,isCustom,
+		name,
+		prefix,value,price, platformPrice, storePrice, brandPrice, rangeType,
+		storeId,
+		brandId, approver, minPrice, maxPrice, totalNum,surplusNum,
+		expirationTime,
+		banMemberNo,
+		saleTime,
+		state, image, memo, creatorId,
+		createdTime,lastModifierId,lastModifiedTime,
+		deletedFlag, version
+	</sql>
+
+
+	<!-- 查询礼卡的标签信息 -->
+
+	<select id="selectLabel" resultType="com.topaiebiz.giftcard.label.entity.CardLabelEntity">
+		SELECT
+		<include refid="label" />
+		FROM t_gif_giftcard_label WHERE deletedFlag=0;
+	</select>
+
+	<!-- 查询礼卡的介质 -->
+
+	<select id="selectMedia"
+		resultType="com.topaiebiz.giftcard.medium.entity.CardMediumEntity">
+		SELECT
+		<include refid="media" />
+		FROM t_gif_giftcard_medium WHERE deletedFlag=0;
+	</select>
+
+	<!-- 查询礼卡的类型 -->
+
+	<select id="selectType" resultType="com.topaiebiz.giftcard.type.entity.CardTypeEntity">
+		SELECT
+		<include refid="type" />
+		FROM t_gif_giftcard_type WHERE deletedFlag=0;
+	</select>
+
+	<!-- 礼卡信息的批删 -->
+
+	<update id="deleteInfoOfBeach">
+
+		UPDATE t_gif_giftcard_info SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="info" open="(" separator=","
+			close=")">
+			#{info}
+		</foreach>
+	</update>
+
+    <!-- 根据礼卡主键ID修改礼卡删除状态 -->
+    <update id="updateByCardIdAndOrderId" parameterType="java.lang.Long">
+    UPDATE t_gif_giftcard_detail SET deletedFlag=1 WHERE id=#{id}
+    </update>
+    
+	<!-- 礼卡信息的批量查询 -->
+	<select id="selectInfoByIdBeach" resultType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+
+		SELECT
+		<include refid="info" />
+		FROM
+		t_gif_giftcard_info WHERE deletedFlag=0 AND id IN
+		<foreach collection="array" item="info" open="(" separator=","
+			close=")">
+			#{info}
+		</foreach>
+	</select>
+
+	<!-- 查询礼卡信息分页+条件查询 -->
+
+	<select id="selectInfoPage" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		a.id AS cardId,a.isVice,a.isCustom,
+		a.name AS
+		infoName,a.prefix,a.value,a.price, a.platformPrice,
+		a.storePrice,
+		a.brandPrice,a.rangeType, a.storeId,
+		a.brandId,
+		a.approver, a.minPrice,
+		a.maxPrice,a.totalNum,a.surplusNum,a.expirationTime,
+		a.banMemberNo,
+		a.saleTime,
+		a.state, a.image,
+		a.memo, a.creatorId,
+		a.createdTime,a.lastModifierId,a.lastModifiedTime, a.deletedFlag,
+		a.version,
+		b.name AS labelName,c.name AS mediumName,d.name AS
+		typeName,e.name AS brandName,f.name AS storeName
+		FROM
+		t_gif_giftcard_info a LEFT
+		JOIN t_gif_giftcard_label b
+		ON
+		a.cardLabel=b.id
+		LEFT JOIN
+		t_gif_giftcard_medium c
+		ON
+		a.cardMedium=c.id
+		LEFT
+		JOIN
+		t_gif_giftcard_type d
+		ON a.cardType=d.id
+		LEFT JOIN
+		t_goo_brand e
+		ON
+		a.brandId = e.id
+		LEFT JOIN t_mer_store_info f
+		ON a.storeId = f.id
+		WHERE
+		a.deletedFlag=0
+		<if test="!(infoName==null or infoName=='')">
+			AND a.name=#{infoName}
+		</if>
+		<if test="!(cardMedium==null)">
+			AND a.cardMedium=#{cardMedium}
+		</if>
+		<if test="!(cardLabel==null or cardLabel==0)">
+			AND a.cardLabel=#{cardLabel}
+		</if>
+		<if test="!(cardType==null or cardType==0)">
+			AND a.cardType=#{cardType}
+		</if>
+		<if test="!(state==null or state==0)">
+			AND a.state=#{state}
+		</if>
+		ORDER BY a.id DESC
+	</select>
+
+	<!-- 礼卡下架 -->
+
+	<update id="giftCardSoldOut" parameterType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		UPDATE
+		t_gif_giftcard_info SET
+		state=3 WHERE id=#{id};
+	</update>
+
+	<!-- 礼卡批量上架 -->
+	<update id="giftCardPutAway">
+		UPDATE t_gif_giftcard_info SET
+		state=2,lastModifiedTime=NOW() WHERE id IN
+		<foreach collection="array" item="info" open="(" separator=","
+			close=")">
+			#{info}
+		</foreach>
+	</update>
+
+	<!-- 美礼卡管理》》查看 -->
+
+	<select id="searchInfoById" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		b.name AS typeName,c.name AS mediumName,d.name AS
+		labelName,e.id,a.id AS cardId,a.image,
+		a.isVice,a.price,a.value,a.name
+		AS infoName,a.expirationTime,a.createdTime,a.surplusNum,
+		a.rangeType,e.cardState,e.cardNo,e.memberId
+		FROM t_gif_giftcard_info a
+		LEFT JOIN
+		t_gif_giftcard_type b
+		ON a.cardType=b.id
+		LEFT JOIN t_gif_giftcard_medium
+		c ON a.cardMedium=c.id
+		LEFT JOIN t_gif_giftcard_label d ON
+		a.cardLabel=d.id
+		LEFT JOIN t_gif_giftcard_detail e ON
+		a.id=e.cardId
+		WHERE e.cardId=#{cardId}
+		<if test="!(cardNo == null || cardNo =='')">
+			AND e.cardNo=#{cardNo}
+		</if>
+	</select>
+
+	<!-- 根据礼卡编号查询礼卡信息 -->
+	<select id="selectDetailByCardNo" parameterType="String"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardDetailEntity">
+		SELECT cardNo FROM t_gif_giftcard_detail WHERE
+		cardNo=#{cardNo}
+	</select>
+
+	<!-- 根据经营类型获取类型编码 -->
+	<select id="selectTypeCodeById" parameterType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity"
+		resultType="com.topaiebiz.giftcard.type.entity.CardTypeEntity">
+		SELECT typeCode FROM t_gif_giftcard_type WHERE
+		id=#{cardType}
+	</select>
+
+	<!-- 查询此种礼卡的限购数量 -->
+	<select id="selectNumberById" parameterType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		SELECT
+		banMemberNo,price
+		FROM t_gif_giftcard_info WHERE
+		id=#{id}
+	</select>
+
+	<!-- 削减此种礼卡的数量 -->
+	<update id="updateSurplusNumById" parameterType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		UPDATE
+		t_gif_giftcard_info
+		SET surplusNum=#{surplusNum}
+		WHERE id=#{id}
+	</update>
+
+	<select id="selectByName" parameterType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		SELECT
+		<include refid="info" />
+		FROM t_gif_giftcard_info WHERE name=#{name}
+	</select>
+
+	<!-- 点击购买更多礼卡 -->
+	<select id="getMoreGiftCardBuy" resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		a.id AS cardId,
+		a.name AS
+		infoName,a.prefix,a.value,a.price,a.rangeType,
+		a.expirationTime,a.state, a.image,a.isVice,
+		a.memo,b.name AS labelName,c.name AS
+		mediumName,d.name AS
+		typeName,a.memo,a.cardMedium
+		FROM
+		t_gif_giftcard_info a LEFT
+		JOIN
+		t_gif_giftcard_label b
+		ON
+		a.cardLabel=b.id
+		LEFT JOIN
+		t_gif_giftcard_medium c
+		ON
+		a.cardMedium=c.id
+		LEFT
+		JOIN
+		t_gif_giftcard_type
+		d
+		ON a.cardType=d.id
+
+		WHERE 1=1
+		<if test="cardMedium != null">
+			AND a.cardMedium=#{cardMedium}
+		</if>
+		<if test="cardId != null">
+			AND a.id=#{cardId}
+		</if>
+		AND a.isVice=0
+		AND a.state=2
+		AND a.surplusNum &gt; 0
+		ORDER BY a.lastModifiedTime DESC
+	</select>
+
+	<!-- 判断此礼卡是否含有副卡 -->
+	<select id="selectBymainCardId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		SELECT
+		<include refid="info" />
+		FROM t_gif_giftcard_info
+		WHERE mainCardId=#{id}
+	</select>
+
+	<!-- 查询此会员当前购买此礼卡的数量 -->
+	<select id="selectCountByMemberId" resultType="java.lang.Long">
+		SELECT COUNT(id)
+		FROM t_gif_giftcard_detail
+		WHERE cardId=#{arg1} AND
+		memberId=#{arg0}
+	</select>
+	
+	<!-- 若为虚拟卡则直接根据订单编号删除礼卡详细信息 -->
+	<update id="deleteByCardIdAndOrderId">
+	 UPDATE t_gif_giftcard_detail SET deletedFlag=1 WHERE cardId=#{arg0} AND
+		orderId=#{arg1}
+	</update>
+	
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.manage.dao.MemberApplyDao">
+
+
+    <select id="selectByMemberId" resultType="com.topaiebiz.member.manage.dto.MemberApplyDto">
+        SELECT a.* FROM t_mem_manager_apply a
+        WHERE a.deletedFlag = 0
+        <if test="!(memberId==null or memberId=='')">
+            AND a.memberId=#{memberId}
+        </if>
+        order by a.createdTime desc
+    </select>
+</mapper>

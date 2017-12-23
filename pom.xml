@@ -1,0 +1,312 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<!-- 表示当前项目采用的POM模型版本是4.0.0。 -->
+	<modelVersion>4.0.0</modelVersion>
+
+	<!--topaiebiz-parent项目的基础信息。 -->
+	<groupId>com.topaiebiz</groupId>
+	<artifactId>topaiebiz-parent</artifactId>
+	<version>1.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>topaiebiz-parent</name>
+	<description>Topaiebiz是一个基于Java的智能电子商务平台，由宏科盈创科技集团有限公司基于其自有PaaS平台Nebula Paas研发。topaiebiz-parent项目是整个topaiebiz智能电子商务平台的根（父）项目。</description>
+
+	<!-- topaiebiz-parent项目所属的组织信息。 -->
+	<organization>
+		<name>Cognieon Technology Group Co., LTD</name>
+		<url>http://www.cognieon.com</url>
+	</organization>
+
+	<!-- Topaiebiz智能电子商务平台的开发者列表。 -->
+	<developers>
+		<developer>
+			<id>Cognieon e-Business Team</id>
+			<name>Cognieon e-Business Team</name>
+			<email>ebiz@cognieon.com</email>
+			<roles>
+				<role>Project Team</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<!-- 定义的一些常用的常量属性，以便于topaiebiz-parent项目及其子项目或应用模块中直接引用。 -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+
+		<!-- 以下为Nebula软件快速研发平台依赖的一些三方插件库的版本号。 -->
+		<!-- Apache的Maven编译插件库的版本号。 -->
+		<maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+		<!-- Apache的Maven发布插件库的版本号。 -->
+		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+
+		<!-- 以下为Topaiebiz智能电子商务平台依赖的一些三方库的版本号。 在topaiebiz-parent中集中进行管理，以便于后续依赖库升级。 -->
+		<!-- Nebula PaaS软件快速研发平台SSM基础框架的快速启动器依赖库的版本号。 -->
+		<nebula-paas-ssmyb-sysmgt.version>1.2.4</nebula-paas-ssmyb-sysmgt.version>
+		<!-- MySQL JDBC驱动依赖库的版本号。 -->
+		<mysql-connector-java.version>5.1.43</mysql-connector-java.version>
+
+	</properties>
+
+	<!-- topaiebiz-parent项目的依赖库管理列表。目的是集中管理其子项目或模块的依赖，子项目或模块在引用此列表中的依赖时，仅需声明依赖的 
+		groupId和artifactId即可，version不用再度声明，因为它会自动被继承。 -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.nebulapaas</groupId>
+				<artifactId>nebula-paas-ssmyb-sysmgt</artifactId>
+				<version>${nebula-paas-ssmyb-sysmgt.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector-java.version}</version>
+			</dependency>
+			<!-- topaiebiz智能电子商务平台各子模块的的依赖 -->
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-system</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- <dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-file-mgmt</artifactId>
+				<version>${project.version}</version>
+			</dependency> -->
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-goods</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-member</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-merchant</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-giftcard</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-transaction</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-promotion</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-distribution</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-payment</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-transport</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-SMS</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-decorate</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-elasticsearch</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-thirdparty-alipay</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-thirdparty-wechat</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-settlement</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-timetask</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.topaiebiz</groupId>
+				<artifactId>topaiebiz-file-mgmt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- topaiebiz-parent项目的子项目或模块列表。 -->
+	<modules>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 会员管理平台。 -->
+		<module>topaiebiz-member</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 商家管理平台。 -->
+		<module>topaiebiz-merchant</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 商品管理平台。 -->
+		<module>topaiebiz-goods</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 礼卡管理平台。 -->
+		<module>topaiebiz-giftcard</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 分销管理平台。 -->
+		<module>topaiebiz-distribution</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 营销管理平台。 -->
+		<module>topaiebiz-promotion</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 交易管理平台。 -->
+		<module>topaiebiz-transaction</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 采购管理平台。 -->
+		<module>topaiebiz-purchasing</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 仓储管理平台。 -->
+		<module>topaiebiz-warehouse</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 运输管理平台。 -->
+		<module>topaiebiz-transport</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 快递管理平台。 -->
+		<module>topaiebiz-express</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 结算管理平台。 -->
+		<module>topaiebiz-settlement</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 支付管理平台。 -->
+		<module>topaiebiz-payment</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 财务管理平台。 -->
+		<module>topaiebiz-finance-mgt</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 内容管理平台。 -->
+		<module>topaiebiz-content</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 社交管理平台。 -->
+		<module>topaiebiz-socializing</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 客服管理平台。 -->
+		<module>topaiebiz-callcenter</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 广告管理平台。 -->
+		<module>topaiebiz-advertising</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 大数据分析平台。 -->
+		<module>topaiebiz-bigdata-analysis</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 金融服务平台。 -->
+		<module>topaiebiz-finance-service</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 系统权限平台。 -->
+		<module>topaiebiz-system</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 商家运营中心。 -->
+		<module>topaiebiz-merchant-oc</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 平台运营中心。 -->
+		<module>topaiebiz-platform-oc</module>
+		<!-- Topaiebiz智能电子商务平台的子项目 - Nebula PaaS快速研发平台使用演示项目。 -->
+		<module>topaiebiz-nebula-paas-demo</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 文件管理中心。 -->
+		<module>topaiebiz-file-mgmt</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 手机短信。 -->
+		<module>topaiebiz-SMS</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 测试平台。 -->
+		<module>topaiebiz-test-oc</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 三方微信。 -->
+		<module>topaiebiz-thirdparty-wechat</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - es全局商品搜索。 -->
+		<module>topaiebiz-elasticsearch</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 装修中心。 -->
+		<module>topaiebiz-decorate</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 支付宝 -->
+		<module>topaiebiz-thirdparty-alipay</module>
+		<!-- Topaiebiz智能电子商务平台的子平台 - 二维码 -->
+        <module>topaiebiz-thirdparty-qrcode</module>
+        <!-- Topaiebiz智能电子商务平台的子平台 - 定时任务 -->
+        <module>topaiebiz-timetask</module>
+        <!-- Topaiebiz智能电子商务平台的子平台 - 线上环境 -->
+        <module>topaiebiz-online</module>
+	</modules>
+
+	<!-- topaiebiz-parent项目的构建配置信息。 -->
+	<build>
+		<plugins>
+			<!-- Spring Boot的构建插件配置信息。 -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- Maven Compiler插件配置信息。 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<!-- Maven Release插件配置信息。 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven-release-plugin.version}</version>
+				<configuration>
+					<!-- <preparationGoals>package deploy</preparationGoals> -->
+					<!-- 项目打tag的命名格式。 -->
+					<!-- <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat> -->
+					<!-- topaiebiz-parent项目的SCM配置信息 - 里程碑的配置信息。 -->
+					<tagBase>https://101.132.106.86/svn/product/topaiebiz/DevLib/Code/PrcSrc/Service/topaiebiz-parent/tags</tagBase>
+					<!-- 自动同步更新子项目的版本。 -->
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<!-- 在发布时不检查是否提交svn的文件过滤配置 -->
+					<checkModificationExcludes>
+						<checkModificationExclude>.project</checkModificationExclude>
+						<checkModificationExclude>.settings</checkModificationExclude>
+						<checkModificationExclude>.classpath</checkModificationExclude>
+						<checkModificationExclude>.factorypath</checkModificationExclude>
+						<checkModificationExclude>**\.factorypath</checkModificationExclude>
+						<checkModificationExclude>**\.project</checkModificationExclude>
+						<checkModificationExclude>**\.settings</checkModificationExclude>
+						<checkModificationExclude>**\.classpath</checkModificationExclude>
+					</checkModificationExcludes>
+					<!-- topaiebiz-parent项目的SCM配置信息 - 分支的配置信息。 -->
+					<!-- <branchBase>https://101.132.106.86/svn/product/topaiebiz/DevLib/Code/PrcSrc/Service/topaiebiz-parent/branches</branchBase> -->
+				</configuration>
+			</plugin>
+		</plugins>
+		<defaultGoal>compile</defaultGoal>
+	</build>
+
+	<!-- topaiebiz-parent项目的SCM配置信息。 -->
+	<scm>
+		<url>https://101.132.106.86/svn/product/topaiebiz/DevLib/Code/PrcSrc/Service/topaiebiz-parent/trunk</url>
+		<connection>scm:svn:https://101.132.106.86/svn/product/topaiebiz/DevLib/Code/PrcSrc/Service/topaiebiz-parent/trunk</connection>
+		<developerConnection>scm:svn:https://101.132.106.86/svn/product/topaiebiz/DevLib/Code/PrcSrc/Service/topaiebiz-parent/trunk</developerConnection>
+	</scm>
+	
+	<!-- topaiebiz-parent项目的Maven私服的分发配置信息。 -->
+	<distributionManagement>
+		<!-- Maven私服的发布库信息。id必须与本地安装的maven的setting.xml文件中配置的对应server的id一致。 -->
+		<repository>
+			<id>releasesRepos</id>
+			<name>maven-releases</name>
+			<url>http://101.132.106.86:8081/repository/maven-releases/</url>
+		</repository>
+		<!-- Maven私服的快照库信息。id必须与本地安装的maven的setting.xml文件中配置的对应server的id一致。 -->
+		<snapshotRepository>
+			<id>snapshotsRepos</id>
+			<name>maven-snapshots</name>
+			<url>http://101.132.106.86:8081/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

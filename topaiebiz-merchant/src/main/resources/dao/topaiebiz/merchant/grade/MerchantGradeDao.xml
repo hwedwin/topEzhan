@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.grade.dao.MerchantGradeDao">
+
+	<!-- 商家等级名称下拉框展示 -->
+	<select id="selectMerchantGradeByName" resultType="com.topaiebiz.merchant.grade.dto.MerchantGradeDto">
+		SELECT id,name
+		FROM t_mer_merchant_grade WHERE deletedFlag
+		= 0
+	</select>
+
+	<!-- 查看商家等级信息(根据Id查看商家等级信息数据回显) -->
+	<select id="selectMerchantGradeById" resultType="com.topaiebiz.merchant.grade.dto.MerchantGradeDto">
+		SELECT
+		id,name,integralValue,description,smallIcon,bigIcon,memo
+		FROM
+		t_mer_merchant_grade WHERE id = #{id}
+		AND deletedFlag
+		= 0
+	</select>
+
+	<!-- 商家等级信息分页检索 -->
+	<select id="selectMerchantGradeList" resultType="com.topaiebiz.merchant.grade.dto.MerchantGradeDto">
+		SELECT
+		g.`id`,g.`name`,g.`smallIcon`,g.`bigIcon`,g.`integralValue`,g.`description`,g.`creatorId`,g.`memo`
+		FROM
+		t_mer_merchant_grade g
+		WHERE g.`deletedFlag`=0
+		<if test="!(name==null or name=='')">
+			AND g.`name` = #{name}
+		</if>
+		<if test="!(creatorId==null or creatorId=='')">
+			AND g.`creatorId`= #{creatorId}
+		</if>
+	</select>
+
+	<!-- 对id进行查询 -->
+	<select id="selectMerchantGradeByIds"
+		resultType="com.topaiebiz.merchant.grade.entity.MerchantGradeEntity">
+		SELECT id FROM
+		t_mer_merchant_grade
+		WHERE id = #{id} AND
+		deletedFlag =
+		0
+	</select>
+
+	<!-- 批量删除操作 -->
+	<delete id="deleteMerchantGradeByIds">
+		UPDATE t_mer_merchant_grade SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 等级名称进行重复验证 -->
+	<select id="selectMerchantGradeInfoByName"
+		resultType="com.topaiebiz.merchant.grade.entity.MerchantGradeEntity">
+		SELECT
+		id,name FROM t_mer_merchant_grade WHERE
+		name =
+		#{name}
+		AND
+		deletedFlag =
+		0
+	</select>
+
+	<!-- 检验商家等级表的id是否已经被商家所占用 -->
+	<select id="selectMerchantInfoById"
+		resultType="com.topaiebiz.merchant.grade.entity.MerchantGradeEntity">
+		SELECT b.`merchantGradeId` FROM t_mer_merchant_grade a
+		INNER JOIN t_mer_merchant_info b ON a.`id`=b.`merchantGradeId` WHERE
+		b.`merchantGradeId` = #{id} AND B.`deletedFlag` = 0
+	</select>
+
+</mapper>

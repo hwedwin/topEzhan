@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.category.backend.dao.BackendCategoryAttrDao">
+  	
+  	<!-- 删除后台类目中对应的规格属性，修改状态 -->
+  	<update id="deleteBackendCategoryAttr">
+  		UPDATE t_goo_backend_category_attr SET deletedFlag = 1 WHERE id = #{id}
+  	</update>
+  	
+  	<!-- 三级类目下面所对应的规格属性 -->
+  	<select id="selectListBackendCategoryAttr" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryAttrEntity">
+  		SELECT id,name,valueList,isMust,isSale,isCustom,sortNo,defaultUnit FROM t_goo_backend_category_attr 
+  		WHERE belongCategory = #{belongCategory} AND storeCustom is null
+  		AND deletedFlag = 0 ORDER BY sortNo 
+  	</select>
+  	
+  	<!-- app端根据后台类目id查询商品属性 -->
+  	<select id="selectListBackendCategoryAttrDto" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryAttrDto">
+  		SELECT id,name,valueList,isMust,isSale,isCustom,sortNo FROM t_goo_backend_category_attr 
+  		WHERE belongCategory = #{backId} 
+  		AND deletedFlag = 0 
+  	</select>
+  	
+  	<!-- 根据id查询backendCategoryAttr -->
+  	<select id="selectBackendCategoryAttrById" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryAttrDto">
+  		SELECT id,belongCategory,name,type,
+  		defaultUnit,isMust,isSale,isCustom,valueList 
+  		FROM t_goo_backend_category_attr WHERE id = #{id}
+  		AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据name查询backendCategoryAttr -->
+  	<select id="selectBackendCategoryAttrByName" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryAttrEntity">
+  		SELECT id,name FROM t_goo_backend_category_Attr WHERE name = #{name}
+  		AND  belongCategory = #{belongCategory} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据name和id查询backendCategoryAttr -->
+  	<select id="selectBackendCategoryAttrByNameAndId" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryAttrDto">
+  		SELECT id,name FROM t_goo_backend_category_Attr WHERE name = #{name} 
+  		AND deletedFlag = 0 AND belongCategory = #{belongCategory}
+  		<if test="!(id == null or id == '')">
+  			AND id != #{id}
+  		</if>
+  	</select>
+  	
+  	<!-- 根据id查询backendCategoryAttr -->
+  	<select id="selectBackendCategoryAttrEntityById" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryAttrEntity">
+  		SELECT id FROM t_goo_backend_category_Attr WHERE id = #{id}
+  		AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 查询最大的排序号 -->
+  	<select id="selectMaxSortNoByBackendCategoryAttr" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryAttrDto">
+  		SELECT MAX(sortNo) AS sortNo FROM t_goo_backend_category_attr 
+  		WHERE deletedFlag = 0 AND belongCategory = #{belongCategory}
+  	</select>
+  	
+  	<!-- 对商品后台类目属性进行排序 -->
+  	<select id="selectBackendCategoryAttrBySortNo" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryAttrDto">
+  		SELECT id,name,sortNo FROM t_goo_backend_category_attr 
+  		WHERE belongCategory = #{belongCategory}
+  		AND deletedFlag = 0 ORDER BY sortNo
+  	</select>
+  	
+</mapper>

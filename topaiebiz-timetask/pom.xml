@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.topaiebiz</groupId>
+        <artifactId>topaiebiz-parent</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>topaiebiz-timetask</artifactId>
+    <name>topaiebiz-timetask</name>
+    <description>Topaiebiz智能电子商务平台的子平台 - 定时任务。</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.topaiebiz</groupId>
+            <artifactId>topaiebiz-giftcard</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.topaiebiz</groupId>
+            <artifactId>topaiebiz-payment</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>com.topaiebiz</groupId>
+        	<artifactId>topaiebiz-promotion</artifactId>
+        </dependency>
+        <!-- 依赖分销管理模块 -->
+         <dependency>
+        	<groupId>com.topaiebiz</groupId>
+        	<artifactId>topaiebiz-distribution</artifactId>
+        </dependency>
+        <!-- 依赖结算管理模块 -->
+         <dependency>
+        	<groupId>com.topaiebiz</groupId>
+        	<artifactId>topaiebiz-settlement</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- topaiebiz-system项目的构建配置信息。 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

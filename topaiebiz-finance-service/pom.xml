@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<!-- 表示当前项目采用的POM模型版本是4.0.0。 -->
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- 表示topaiebiz-finance-service项目是topaiebiz-parent项目的子项目或模块。 -->
+	<parent>
+		<groupId>com.topaiebiz</groupId>
+		<artifactId>topaiebiz-parent</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+
+	<!-- topaiebiz-finance-service项目的基础信息。 -->
+	<artifactId>topaiebiz-finance-service</artifactId>
+	<name>topaiebiz-finance-service</name>
+	<description>Topaiebiz智能电子商务平台的子平台 - 金融服务平台。</description>
+
+	<!-- topaiebiz-finance-service项目的依赖库列表。 -->
+	<dependencies>
+		<!-- Nebula PaaS软件快速研发平台SSM基础框架的快速启动器，以Spring Boot, MyBatis, MyBatis Plus, 
+			Alibaba Druid等技术为基础构建。 -->
+		<dependency>
+			<groupId>com.nebulapaas</groupId>
+			<artifactId>nebula-paas-ssmyb-sysmgt</artifactId>
+		</dependency>
+		<!-- 关系型数据库MySQL的JDBC连接驱动的依赖库。 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+	</dependencies>
+
+	<!-- topaiebiz-finance-service项目的构建配置信息。 -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

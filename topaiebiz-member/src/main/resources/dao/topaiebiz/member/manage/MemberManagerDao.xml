@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.manage.dao.MemberManagerDao">
+
+    <!-- 普通会员等级分页加列表加查询 -->
+    <select id="selectMembersInfoList" resultType="com.topaiebiz.member.manage.dto.MemberInfoDto"
+            parameterType="com.topaiebiz.member.manage.dto.MemberInfoDto">
+        SELECT a.*
+        FROM t_mem_member a
+        WHERE a.deletedFlag = 0
+        <if test="!(nickName==null or nickName=='')">
+            AND a.nickName LIKE CONCAT('%',#{nickName},'%')
+        </if>
+        <if test="!(typeId==null or typeId=='')">
+            AND a.typeId=#{typeId}
+        </if>
+        <if test="!(telephone==null or telephone=='')">
+            AND a.telephone=#{telephone}
+        </if>
+        order by a.createdTime desc
+    </select>
+
+    <!--根据手机号码查询普通会员信息-->
+    <select id="selectMembersInfoByPhone" resultType="com.topaiebiz.member.manage.dto.MemberInfoDto">
+        SELECT a.*
+        FROM t_mem_member a
+        WHERE a.deletedFlag = 0
+        <if test="!(typeId==null or typeId=='')">
+            AND a.typeId=#{typeId}
+        </if>
+        <if test="!(parentTelephone==null or parentTelephone=='')">
+            AND a.telephone=#{parentTelephone}
+        </if>
+	</select>
+
+    <!--查询出指定id下面的下级会员-->
+    <select id="selectMembersInfoListById" resultType="com.topaiebiz.member.manage.dto.MemberInfoDto"
+            parameterType="com.topaiebiz.member.manage.dto.MemberInfoDto">
+        SELECT a.*
+        FROM t_mem_member a
+        WHERE a.deletedFlag = 0
+        <if test="!(typeId==null or typeId=='')">
+            AND a.typeId=#{typeId}
+        </if>
+        <if test="!(id==null or id=='')">
+            AND a.parentId=#{id}
+        </if>
+        order by a.createdTime desc
+    </select>
+
+
+    <select id="selectShopKeeperList" resultType="com.topaiebiz.member.manage.dto.ShopKeeperInfoDto">
+        SELECT m.*, g.name gradeName,
+        FROM t_mem_member m LEFT JOIN t_mem_member_grade g
+        ON m.gradeId = g.id
+        WHERE m.deletedFlag = 0 AND g.deletedFlag = 0
+        <if test="!(nickName==null or nickName=='')">
+            AND m.nickName LIKE CONCAT('%',#{nickName},'%')
+        </if>
+        <if test="!(typeId==null or typeId=='')">
+            AND m.typeId=#{typeId}
+        </if>
+        <if test="!(telephone==null or telephone=='')">
+            AND m.telephone=#{telephone}
+        </if>
+        <if test="!(gradeId==null or gradeId=='')">
+            AND m.gradeId=#{gradeId}
+        </if>
+        order by m.createdTime desc
+    </select>
+
+    <select id="selectFirstNum" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM t_mem_member a
+        WHERE a.deletedFlag = 0
+        <if test="!(id==null or id=='')">
+            AND a.parentId=#{id}
+        </if>
+    </select>
+
+
+    <select id="selectSecondtNum" resultType="java.lang.Long">
+      SELECT count(*)  FROM  t_mem_member t2,
+        ( SELECT id FROM  t_mem_member t1  WHERE t1.deletedFlag = 0
+            <if test="!(id==null or id=='')">
+                AND t1.parentId=#{id}
+            </if>
+        ) t3
+        WHERE  t2.parentId = t3.id and t2.deletedFlag = 0;
+    </select>
+
+
+    <select id="selectMembersInfoByRealName" resultType="com.topaiebiz.member.manage.dto.MemberInfoDto">
+        SELECT a.*
+        FROM t_mem_member a
+        WHERE a.deletedFlag = 0
+        <if test="!(realName==null or realName=='')">
+            AND a.realName LIKE CONCAT('%',#{realName},'%')
+        </if>
+    </select>
+
+    <!--根据手机号查询用户信息-->
+    <select id="selectMembersInfoByTelePhone" resultType="com.topaiebiz.member.manage.entity.MemberInfoEntity">
+        SELECT a.*
+        FROM t_mem_member a where 1= 1
+        <if test="!(telephone==null or telephone=='')">
+            AND a.telephone=#{telephone}
+        </if>
+    </select>
+
+    <update id="updateParentId">
+        UPDATE t_mem_member
+        <set>
+            <if test="newParentId != null" >
+                parentId = #{newParentId}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateMemberStatusById">
+        UPDATE t_mem_member
+        <set>
+            <if test="status != null" >
+                accountState = #{status}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+</mapper>

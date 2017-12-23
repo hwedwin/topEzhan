@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.spu.dao.GoodsSpuPictureDao">
+  	
+  	<!-- 查询商品spu所对应的商品spu图片 -->
+  	<select id="selectGoodsSpuPictureBySpuId" resultType="com.topaiebiz.goods.spu.entity.GoodsSpuPictureEntity">
+  		SELECT id FROM t_goo_goods_spu_picture WHERE spuId = #{spuId}  AND deletedflag = 0
+  	</select>
+	
+	<!-- 逻辑删除商品spu的属性 -->
+  	<update id="deleteGoodsSpuPicture">
+  		UPDATE t_goo_goods_spu_picture SET deletedFlag = 1 WHERE id = #{id}
+  	</update>
+  	
+  	<!--  查询商品spu图片 -->
+  	<select id="selectGoodsSpuPictures" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuPictureDto">
+  		SELECT id,name,type,isMain, description 
+  		FROM t_goo_goods_spu_picture 
+  		WHERE spuId = #{spuId} AND deletedFlag = 0
+  	</select>
+	
+</mapper>

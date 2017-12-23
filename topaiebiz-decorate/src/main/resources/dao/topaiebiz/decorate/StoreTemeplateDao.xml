@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.decorate.dao.StoreTemeplateDao">
+
+	<!-- 根据 -->
+	<update id="deleteStoreTemeplate">
+		UPDATE t_dec_store_temeplate SET deletedFlag=1 WHERE id=#{id}
+	</update>
+	
+	<select id="selectByStoreIdAndTemeplateId" resultType="com.topaiebiz.decorate.entity.StoreTemeplateEntity">
+		SELECT
+			id,storeId,templateId,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version        
+		FROM 
+			t_dec_store_temeplate
+		WHERE 
+			deletedFlag=0 and storeId=#{storeId} and templateId=#{templateId}
+	</select>
+	
+	<select id="selectByStoreId" resultType="com.topaiebiz.decorate.entity.StoreTemeplateEntity">
+		SELECT
+			id,storeId,templateId,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version        
+		FROM 
+			t_dec_store_temeplate
+		WHERE 
+			deletedFlag=0 and storeId=#{storeId}
+	</select>
+
+</mapper>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.promotion.mgmt.dao.PromotionEntryDao">
+
+	<!-- 根据活动id查询商家报名信息 -->
+	<select id="selectPromotionEntryByPromotionId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionEntryDto">
+		SELECT
+			id,
+			promotionId,
+			storeId,
+			state,
+			memo
+		FROM
+			t_pro_promotion_entry
+		WHERE
+			deletedFlag = 0
+		AND promotionId = #{promotionId}
+	</select>
+	
+	<!-- 营销活动报名商家列表 -->
+	<select id = "selectPromotionEnrolStoreList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionEntryDto" >
+		SELECT 
+			e.id,
+			e.promotionId,
+			e.storeId,
+			i.NAME AS storeName,
+			mg.name AS storeGradeName,
+			p.applyStartTime AS applyStartTime,
+			p.applyEndTime AS applyEndTime,
+			e.state
+		 FROM t_pro_promotion_entry e 
+		LEFT JOIN t_pro_promotion p ON e.promotionId = p.id
+		LEFT JOIN t_mer_store_info i ON e.storeId = i.id
+		LEFT JOIN t_mer_merchant_grade mg ON i.merchantGradeId = mg.id
+		WHERE e.deletedFlag = 0 AND p.deletedFlag = 0
+		AND i.deletedFlag = 0 AND e.promotionId = #{promotionId}
+		<if test="!(storeName==null or storeName=='')">
+				AND i.NAME = #{storeName}
+		</if>
+		<if test="!(storeGradeId==null or storeGradeId=='')">
+				AND mg.id = #{storeGradeId}
+		</if>
+		<if test="!(state==null or state=='')">
+				AND e.state = #{state}
+		</if>
+		<if test="!(applyStartTime==null or applyStartTime=='')">
+			AND p.applyStartTime >= STR_TO_DATE(#{applyStartTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(applyEndTime==null or applyEndTime=='')">
+			AND p.applyEndTime &lt;= STR_TO_DATE(#{applyEndTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+	
+	</select>
+
+	<!-- 查看店铺报名详情 -->
+	<select id = "selectPromotionEnrolStore" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionEntryDto">
+		SELECT 
+			e.id,
+			e.promotionId,
+			e.storeId,
+			i.NAME AS storeName,
+			mg.name AS storeGradeName,
+			p.applyStartTime AS applyStartTime,
+			p.applyEndTime AS applyEndTime,
+			e.state
+		 FROM t_pro_promotion_entry e 
+		LEFT JOIN t_pro_promotion p ON e.promotionId = p.id
+		LEFT JOIN t_mer_store_info i ON e.storeId = i.id
+		LEFT JOIN t_mer_merchant_grade mg ON i.merchantGradeId = mg.id
+		WHERE e.deletedFlag = 0 AND p.deletedFlag = 0
+		AND i.deletedFlag = 0 AND e.id = #{id}
+	</select>
+
+	<!-- 根据活动id和店铺id查询报名信息 -->
+	<select id = "selectPromotionEntryByPromotionIdAndStoreId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionEntryDto">
+		SELECT
+			id,
+			promotionId,
+			storeId,
+			state,
+			memo
+		FROM
+			t_pro_promotion_entry
+		WHERE
+			deletedFlag = 0
+		AND promotionId = #{promotionId} AND storeId = #{storeId}
+	</select>
+
+</mapper>

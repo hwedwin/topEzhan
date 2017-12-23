@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.FreightTempleteDao">
+
+	<!-- 查询运费模板详情 -->
+	<select id="selectFreightTempleteByStoreId" resultType="com.topaiebiz.merchant.enter.dto.FreightTempleteDto">
+		SELECT
+		a.`id` ,
+		a.`storeId`,a.`freightName`,a.`isDefault`,a.`pricing`,a.`onlyThis`,
+		b.`freightId`,b.`type`,b.`districtIdList`,b.`firstPrice`,b.`firstNum`,b.`addPrice`,b.`addNum`,b.`isDefault`
+		FROM t_mer_freight_templete a LEFT JOIN t_mer_freight_templete_detail
+		b ON a.`id`=b.`freightId` WHERE storeId = #{storeId}
+	</select>
+
+	<!-- 平台的运费模板详情 -->
+	<select id="selectFreightTempleteList" resultType="com.topaiebiz.merchant.enter.dto.FreightTempleteDto">
+		SELECT
+			a.id,a.`freightName`,a.`isDefault`,a.`pricing`,a.`onlyThis`
+		FROM 
+			t_mer_freight_templete a
+		WHERE
+			a.deletedFlag =0
+		<if test="!(storeId==null or storeId==0)">
+			AND a.storeId = #{storeId}
+		</if>
+		<if test="storeId==null">
+			AND a.storeId is null
+		</if>
+		ORDER BY a.createdTime DESC
+	</select>
+
+	<!-- 运费模板列表、分页检索 -->
+	<select id="selectMerFreightTempleteList"
+		resultType="com.topaiebiz.merchant.enter.dto.MerFreightTempleteDto">
+		SELECT id,freightName,pricing FROM t_mer_freight_templete
+		WHERE deletedFlag = 0
+		<if test="!(freightName==null or freightName=='')">
+			AND freightName = #{freightName}
+		</if>
+		<if test="!(pricing==null or pricing=='')">
+			AND pricing = #{pricing}
+		</if>
+		<if test="!(storeId==null)">
+			AND storeId = #{storeId}
+		</if>
+		<if test="storeId==null">
+			AND storeId is null
+		</if>
+	</select>
+
+	<!-- 删除商家运费模板 -->
+	<update id="delectMerFreightTempleteById">
+		UPDATE t_mer_freight_templete SET deletedFlag = 1
+		WHERE id = #{id}
+	</update>
+
+</mapper>

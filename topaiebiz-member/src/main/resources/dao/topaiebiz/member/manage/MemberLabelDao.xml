@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.manage.dao.MemberLabelDao">
+
+    <select id="getLabelList" resultType="com.topaiebiz.member.manage.dto.MemberLabelDto">
+      /*  SELECT l.*, t.typeName typeName, t.sortNo typeSortNo
+        FROM t_mem_label l INNER  JOIN t_mem_label_type t
+        ON l.typeId = t.id
+        AND l.deletedFlag = 0 AND t.deletedFlag = 0
+        ORDER BY t.sortNo, l.sortNo*/
+        SELECT * from t_mem_label
+        WHERE deletedFlag = 0
+        ORDER BY sortNo
+    </select>
+
+    <select id="selectLabelListByTypeId" resultType="com.topaiebiz.member.manage.dto.MemberLabelDto">
+        SELECT * from t_mem_label
+        WHERE deletedFlag = 0
+        <if test="!(typeId==null or typeId==0)">
+            AND typeId=#{typeId}
+        </if>
+        ORDER BY sortNo
+    </select>
+
+    <select id="selectLabelByName" resultType="com.topaiebiz.member.manage.dto.MemberLabelDto">
+      SELECT * FROM t_mem_label
+      WHERE deletedFlag = 0
+      AND name = #{name}
+    </select>
+
+    <select id="selectLabelSortNoByName" resultType="java.lang.Long">
+      SELECT max(sortNo) FROM t_mem_label
+      WHERE deletedFlag = 0
+      AND name = #{name}
+    </select>
+    <select id="selectLabelMaxSortNoByTypeId" resultType="java.lang.Long">
+      SELECT max(sortNo) FROM t_mem_label
+          WHERE 1 = 1
+          AND typeId = #{typeId}
+    </select>
+
+    <delete id="deleteLabelByTypeId">
+      DELETE FROM t_mem_label WHERE typeId = #{typeId}
+    </delete>
+</mapper>

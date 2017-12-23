@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.security.dao.SystemRoleDao">
+
+	<select id="selectList" resultType="com.topaiebiz.system.security.entity.SystemRoleEntity">
+		select id, name, inbuiltFlag from t_sys_system_role
+	</select>
+	
+	<select id="selectByUserId" resultType="com.topaiebiz.system.security.entity.SystemRoleEntity">
+		select r.* from t_sys_system_user_role ur join t_sys_system_role r 
+		on ur.roleId=r.id where ur.userId=#{id} and ur.deletedFlag=0 and r.deletedFlag=0
+	</select>
+	
+</mapper>

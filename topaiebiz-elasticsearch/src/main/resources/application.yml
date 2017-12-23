@@ -1,0 +1,95 @@
+server:
+  # 设置应用的访问端口为8888.访问基路径为：http://ip|domainName:8888/.
+  port: 8888
+  
+ 
+spring:
+  datasource:
+    druid:
+      # 数据库的连接地址。
+      url: jdbc:mysql://101.132.106.86:3306/topaiebiz?characterEncoding=utf8
+      # 数据库的JDBC连接驱动类。
+      driver-class-name: com.mysql.jdbc.Driver 
+      # 数据库的用户名。
+      username: root
+      # 数据库的密码。
+      password: hkyc2017
+      # 初始化时建立的物理连接数。初始化发生在显式调用init方法，或者第一次getConnection时.
+      initial-size: 5
+      # 连接池最大物理连接数量。
+      max-active: 50
+      # 连接池最小物理连接数量。
+      min-idle: 5
+      # 获取连接时最大等待时间，单位为毫秒。
+      # 配置之后，缺省启用公平锁，并发效率会有所下降，若需要可以通过配置useUnfairLock属性为true使用非公平锁。
+      max-wait: 60000
+      # 是否缓存preparedStatement，也就是PSCache。
+      # PSCache对支持游标的数据库性能提升巨大，比如说oracle。在mysql下建议关闭。
+      pool-prepared-statements: true
+      # 要启用PSCache，其值必须大于0，当大于0时，poolPreparedStatements自动触发修改为true。
+      # 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100。
+      max-pool-prepared-statement-per-connection-size: 20
+      # 用来检测连接是否有效的sql，要求是一个查询语句，常用select 'x'。 
+      # 如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会起作用。
+      validation-query: select 1 from dual
+      # 检测连接是否有效的超时时间，单位为秒。
+      # 底层调用jdbc Statement对象的void setQueryTimeout(int seconds)方法。
+#      validation-query-timeout: 30
+      # 有两个含义：
+      #  1) Destroy线程会检测连接的间隔时间，若连接空闲时间大于等于minEvictableIdleTimeMillis则关闭物理连接。
+      #  2) testWhileIdle的判断依据，详细看testWhileIdle属性的说明。
+      time-between-eviction-runs-millis: 60000
+      # 连接保持空闲而不被驱逐的最长时间。
+      min-evictable-idle-time-millis: 300000
+      # 建议配置为true，不影响性能，并且保证安全性。
+      # 申请连接的时候检测，若空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+      test-while-idle: true
+      # 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-borrow: false
+      # 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-return: false
+      # 类型是字符串，通过别名的方式配置扩展的拦截器插件，常用的拦截器插件有：
+      # 监控统计用的filter:stat，日志用的filter:log4j，防御sql注入攻击的filter:wall，三个同时配置的化，用逗号隔开。
+      # 注意，Druid中的filter-class-names配置项是不起作用的，必须采用filters配置项才可以。
+      filters: stat,wall,log4j
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录。
+      connect-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      # 合并多个DruidDataSource的监控数据
+      use-global-data-source-stat: true
+      
+  messages:
+    basename: i18n/nebula/paas/messages,i18n/topaiebiz/elasticsearch/messages,i18n/topaiebiz/goods/messages
+
+# MyBatis Plus相关配置信息。
+mybatis-plus:
+  # 实体类与数据库表的xml映射文件的位置。
+  mapper-locations: classpath*:/**/dao/xml/*Dao.xml
+  # 实体类的包路径。正确方式：/**/.entity或者/**.entity；错误方式：**.entity
+  typeAliasesPackage: /**.entity
+  # MyBatis Plus一些全局配置。
+  global-config:
+    # 主键类型 。 0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID，适用于分布式)", 3:"全局唯一ID UUID"
+    id-type: 2
+    # 字段验证策略。 0:"忽略判断", 1:"非 NULL 判断", 2:"非空判断"
+    field-strategy: 2
+    # 表名和字段名是否使用下划线命名。
+    db-column-underline: false
+#    # 公共属性处理器，用于填充公共属性的值，例如创建时间、最后修改时间等。
+#    meta-object-handler: com.nebulaframe.data.mybatis.handler.CommonPropertyHandler
+    
+  configuration:
+    # SQL输出调试器，用于将SQL语句和结果输出到控制台，以便调试。开发测试环境使用，不建议生产环境使用。
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    
+    
+#    caches:
+      
+#    # 自定义的元对象处理器。实现公共字段（或属性）的值的自动填充。
+#    meta-object-handler: ss
+#    # 刷新mapper 调试神器
+#    refresh-mapper: true
+#    # 逻辑删除全局值配置。
+#    logic-delete-value: 0
+#    logic-not-delete-value: 1
+
+

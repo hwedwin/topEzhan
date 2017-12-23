@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.order.merchant.dao.OrderInvoiceDao">
+
+	<!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+
+	<!-- 根据订单id查询订单发票 -->
+	<select id="selectOrderInvoice" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.OrderInvoiceEntity">
+		SELECT
+		id,orderId,storeId,invoiceType,title,taxpayerNo,text,invoiceImage,
+		modeType,`name`,sum,addressTel,account,state,memo,creatorId,invoiceCode,
+		createdTime,lastModifierId,lastModifiedTime,deletedFlag,version,invoiceNum
+		from t_tsa_order_invoice
+		WHERE orderId = #{orderId}
+
+	</select>
+
+</mapper>

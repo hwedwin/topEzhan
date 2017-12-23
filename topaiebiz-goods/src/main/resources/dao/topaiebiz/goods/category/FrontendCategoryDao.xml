@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.category.frontend.dao.FrontendCategoryDao">
+  	
+  	<!-- 商品前台类目一级类目 -->
+  	<select id="selectListOneLevelFrontendCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+  		SELECT id,name,parentId,description,image FROM t_goo_frontend_category 
+  		WHERE parentId = 0 AND deletedFlag = 0
+  		<if test="!(name==null or name == '')">
+  			AND name like CONCAT('%', #{name}, '%')  
+  		</if>
+  		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore is null
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+  		ORDER BY createdTime DESC
+  	</select>
+  	<!-- 商品前台类目二,三级类目 -->
+  	<select id="selectListTwoOrThreeLevelFrontendCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+  		SELECT id,name,parentId,description,image FROM t_goo_frontend_category  
+  		WHERE parentId = #{parentId} AND deletedFlag = 0
+  		<if test="!(name == null or name == '')">
+  			AND name like CONCAT('%', #{name}, '%')  
+  		</if>
+  		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore is null
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+  		ORDER BY createdTime DESC
+  	</select>
+  	
+  	<!-- app端商品前台类目一级类目 -->
+  	<select id="selectAppListOneLevelFrontendCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+  		SELECT id,name,parentId,description,image FROM t_goo_frontend_category 
+  		WHERE parentId = 0 AND deletedFlag = 0
+  		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore = 1
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+  		ORDER BY createdTime DESC
+  	</select>
+  	<!-- app端商品前台类目二,三级类目 -->
+  	<select id="selectAppListTwoOrThreeLevelFrontendCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+  		SELECT id,name,parentId,description,image FROM t_goo_frontend_category  
+  		WHERE parentId = #{parentId} AND deletedFlag = 0
+  		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore = 1
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+  		ORDER BY createdTime DESC
+  	</select>
+  	
+  	<!-- 商品前台类目三级类目 -->
+  	<select id="selectThreeLevelFrontendCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+  		SELECT id,name,parentId,description,image FROM t_goo_frontend_category  
+  		WHERE parentId = #{id} AND deletedFlag = 0
+  	</select>
+	
+	<!-- 通过上级类目查询下级类目 -->
+	<select id="selectAllFrontendCategoryById" resultType="com.topaiebiz.goods.category.frontend.entity.FrontendCategoryEntity">
+		SELECT id FROM t_goo_frontend_category WHERE parentId=#{parentId}
+		AND deletedFlag = 0
+	</select>
+	
+	<!-- 删除前台类目 -->
+	<update id="deleteFrontendCategory">
+		UPDATE t_goo_frontend_category SET deletedFlag = 1 WHERE id = #{id};
+	</update>
+	
+	<!-- 根据name查询前台类目 -->
+	<select id="selectFrontendCategoryByName" resultType="com.topaiebiz.goods.category.frontend.entity.FrontendCategoryEntity">
+		SELECT id,name FROM t_goo_frontend_category WHERE name = #{name} 
+		AND deletedFlag = 0
+		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore is null
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+	</select>
+	
+	<!-- 根据name和id查询前台类目 -->
+	<select id="selectFrontendCategoryByNameAndId" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+		SELECT id,name FROM t_goo_frontend_category WHERE name = #{name} 
+		AND deletedFlag = 0
+		<if test="!(id == null or id == '')">
+  			AND id != #{id}
+  		</if>
+  		<if test="belongStore==null or belongStore == ''">
+  			AND belongStore is null
+  		</if>
+  		<if test="!(belongStore==null or belongStore == '')">
+  			AND belongStore = #{belongStore}
+  		</if>
+	</select>
+	
+	<!-- 根据id查询前台类目 -->
+	<select id="selectFrontendCategoryById" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+		SELECT id,name,image FROM t_goo_frontend_category WHERE id = #{id} 
+		AND deletedFlag = 0
+	</select>
+	
+	<!-- 根据id查询前台类目 -->
+	<select id="selectFrontendCategoryEntityById" resultType="com.topaiebiz.goods.category.frontend.entity.FrontendCategoryEntity">
+		SELECT id,name,parentId,description,image FROM t_goo_frontend_category WHERE id = #{id} 
+		AND deletedFlag = 0
+	</select>
+	
+	<!-- app端查询前台第三级类目 -->
+	<select id="selectAppThreeFrontendCategoryList" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+		SELECT id,name,parentId,description,image,level,belongStore 
+		FROM t_goo_frontend_category WHERE level = 3 
+		AND deletedFlag = 0
+		<if test="storeId==null or storeId == ''">
+  			AND belongStore = 1
+  		</if>
+  		<if test="!(storeId==null or storeId == '')">
+  			AND belongStore = #{storeId}
+  		</if>
+	</select>
+	
+	<!-- 装修时查询前台第三级类目列表 -->
+	<select id="selectThreeFrontendCategoryList" resultType="com.topaiebiz.goods.category.frontend.dto.FrontendCategoryDto">
+		SELECT id,name,parentId,description,image,level,belongStore 
+		FROM t_goo_frontend_category WHERE 
+		deletedFlag = 0 AND belongStore = #{storeId} 
+	</select>
+	
+</mapper>

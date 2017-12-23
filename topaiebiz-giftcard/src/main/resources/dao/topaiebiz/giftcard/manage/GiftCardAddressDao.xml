@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.giftcard.manage.dao.GiftCardAddressDao">
+
+	<sql id="address">
+		id,orderId,name,districtId,
+		address,zipCode,telephone,landline,otherTelephone,memo,
+		creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+
+	</sql>
+	<!-- 查询配送详细信息 -->
+
+	<select id="selectAddressList"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardAddressEntity">
+		SELECT
+		<include refid="address" />
+		FROM t_tsa_order_address WHERE deletedFlag=0;
+	</select>
+
+	<!-- 批量删除收货地址信息 -->
+	<update id="deleteAddressOfBeach">
+		UPDATE t_tsa_order_address SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="address" open="(" separator=","
+			close=")">
+			#{address}
+		</foreach>
+	</update>
+
+	<!-- 根据订单编号查询配送地址信息 -->
+	<select id="selectByOrderId"
+		parameterType="com.topaiebiz.giftcard.manage.entity.CardAddressEntity"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardAddressEntity">
+		SELECT
+		<include refid="address" />
+		FROM t_tsa_order_address WHERE orderId=#{orderId}
+	</select>
+</mapper>

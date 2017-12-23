@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.MerchantAccountDao">
+
+	<!-- 缴费信息回显 -->
+	<select id="selectAccountByInfo" resultType="com.topaiebiz.merchant.enter.dto.CapitalDto">
+		SELECT
+		b.`merchantId`, a.`contactName`,b.`bankName`,b.`bankNum` FROM
+		t_mer_merchant_info a INNER JOIN t_mer_merchant_account b ON
+		a.`id`=b.`merchantId` WHERE a.`id`=
+		(SELECT a.`id` FROM
+		t_mer_merchant_info a WHERE a.`state` = 3)
+	</select>
+	
+	<!-- 根据商家id查出商家账户信息的主键id -->
+	<select id = "selectMerchantAccountById" resultType="java.lang.Long">
+	      SELECT id FROM t_mer_merchant_account WHERE merchantId = #{belongId}
+	</select>
+
+</mapper>

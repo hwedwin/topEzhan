@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.mgmt.dao.MemberMgmtDao">
+
+	<!-- 会员等级分页加列表加查询 -->
+	<select id="selectMemberMgmt" resultType="com.topaiebiz.member.mgmt.dto.MemberDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberDto">
+		SELECT a.id,a.memberCode,b.name gradeName,c.name
+		typeName,a.realName,a.nickName,a.gender,a.accountState,d.name
+		storeName,b.description,a.telephone,a.upgradeScore,a.createdTime,a.idCard,a.typeId,a.gradeId,a.storeId
+		FROM t_mem_member a LEFT JOIN t_mem_member_grade b ON a.gradeId=b.id
+		LEFT JOIN
+		t_mem_member_type c ON a.typeId=c.id
+		LEFT JOIN
+		t_mer_store_info d ON a.storeId=d.id
+		WHERE a.deletedFlag = 0
+		<if test="!(memberCode==null or memberCode=='')">
+			AND a.memberCode=#{memberCode}
+		</if>
+		<if test="!(nickName==null or nickName=='')">
+			AND a.nickName=#{nickName}
+		</if>
+		<if test="!(idCard==null or idCard=='')">
+			AND a.idCard=#{idCard}
+		</if>
+		<if test="!(telephone==null or telephone=='')">
+			AND a.telephone=#{telephone}
+		</if>
+		<if test="!(typeId==null or typeId=='')">
+			AND a.typeId=#{typeId}
+		</if>
+		<if test="!(gradeId==null or gradeId=='')">
+			AND a.gradeId=#{gradeId}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND a.storeId=#{storeId}
+		</if>
+	</select>
+
+	<!-- 会员管理分页加列表加查询(商家端) -->
+	<select id="selectMemberMgmtForSeller" resultType="com.topaiebiz.member.mgmt.dto.MemberDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberDto">
+		SELECT a.id,a.memberCode,b.name gradeName,c.name
+		typeName,a.realName,a.nickName,a.gender,a.accountState,d.name
+		storeName,b.description,a.telephone,a.upgradeScore,a.createdTime,a.idCard,a.typeId,a.gradeId,a.storeId
+		FROM t_mem_member a LEFT JOIN t_mem_member_grade b ON a.gradeId=b.id
+		LEFT JOIN
+		t_mem_member_type c ON a.typeId=c.id
+		LEFT JOIN
+		t_mer_store_info d ON a.storeId=d.id
+		WHERE a.deletedFlag = 0 AND
+		a.storeId=#{storeId}
+		<if test="!(memberCode==null or memberCode=='')">
+			AND a.memberCode=#{memberCode}
+		</if>
+		<if test="!(nickName==null or nickName=='')">
+			AND a.nickName=#{nickName}
+		</if>
+		<if test="!(idCard==null or idCard=='')">
+			AND a.idCard=#{idCard}
+		</if>
+		<if test="!(telephone==null or telephone=='')">
+			AND a.telephone=#{telephone}
+		</if>
+		<if test="!(typeId==null or typeId=='')">
+			AND a.typeId=#{typeId}
+		</if>
+		<if test="!(gradeId==null or gradeId=='')">
+			AND a.gradeId=#{gradeId}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND a.storeId=#{storeId}
+		</if>
+	</select>
+
+	<!-- 获取会员类型列表 -->
+	<select id="selectListOfMemberType"
+		resultType="com.topaiebiz.member.reserve.entity.MemberTypeEntity">
+		SELECT id,name FROM t_mem_member_type;
+	</select>
+
+	<!-- 对会员编号进行重复验证 -->
+	<select id="selectMemberByCode" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity">
+		SELECT memberCode
+		FROM t_mem_member WHERE memberCode = #{memberCode} AND deletedFlag =
+		0;
+	</select>
+
+	<!-- 对会员用户名进行是否冻结验证 -->
+	<select id="selectMemberByuserName" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity">
+		SELECT
+		userName,password
+		FROM t_mem_member WHERE userName = #{userName} AND
+		deletedFlag = 0 AND accountState = 0;
+	</select>
+
+	<!-- 根据id删除会员信息(修改状态) -->
+	<update id="deleteMemberMgmts" parameterType="Long">
+		UPDATE t_mem_member SET deletedFlag = 1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 根据id冻结会员状态 -->
+	<update id="congelationMemberMgmt" parameterType="Long">
+		UPDATE
+		t_mem_member SET accountState = 1 WHERE id = #{id};
+	</update>
+
+	<!-- 根据id解除冻结会员状态 -->
+	<update id="relieveMemberMgmt" parameterType="Long">
+		UPDATE
+		t_mem_member
+		SET accountState = 0 WHERE id = #{id};
+	</update>
+	<!-- 添加会员与店铺绑定记录 -->
+	<insert id="insertMemberStoreBindLogEntity"
+		parameterType="com.topaiebiz.member.mgmt.entity.MemberStoreBindLogEntity">
+		INSERT INTO t_mem_member_store_bind_log
+		(id,memberId,storeId,type,stauts,memo,creatorId,createdTime,deletedFlag,version)VALUES
+		(#{id},#{memberId},#{storeId},#{type},#{stauts},#{memo},#{creatorId},#{createdTime},#{deletedFlag},#{version});
+	</insert>
+
+	<!-- 根据手机号查询会员是否冻结验证 -->
+	<select id="selectMemberByuserTelephone" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity"
+		parameterType="String">
+		SELECT
+		id,telephone,userName,password,accountState,version
+		FROM t_mem_member
+		WHERE telephone = #{telephone} AND deletedFlag = 0 AND accountState =
+		0;
+	</select>
+
+	<!-- 查询#{beforDate-afterDate}之内新注册的会员ID集合 -->
+	<select id="getNewRegisterByTimeFrame" resultType="Long">
+		select id FROM t_mem_member WHERE deletedFlag = 0 
+		<if test="!(beforDate==null or beforDate=='')">
+			AND createdTime &gt;= STR_TO_DATE(#{beforDate},'%Y-%m-%d')
+		</if>
+		<if test="!(afterDate==null or afterDate=='')">
+			AND createdTime &lt;= STR_TO_DATE(#{afterDate},'%Y-%m-%d')
+		</if>
+	</select>
+
+	<!-- 根据手机号查询用户对象 -->
+	<select id="getMemberByuserTelephone" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity"
+		parameterType="String">
+		SELECT
+		id,merchantId,storeId,telephone,userName,password,accountState,version
+		FROM t_mem_member WHERE telephone = #{telephone};
+	</select>
+	
+	<!--  会员增值情况视图(按年展示)  -->
+	<select id="selectMemberRecordByYear" resultType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto">
+		SELECT year(registerTime) years,
+		month(registerTime)
+		months,
+		COUNT(id)
+		record
+		FROM t_mem_member WHERE
+		<if test="!(registerTime==null)">
+			year(registerTime) = year(#{registerTime,jdbcType=DATE})
+		</if>
+		GROUP BY
+		year(registerTime),
+		month(registerTime);
+	</select>
+	
+	<!--  会员增值情况视图(按月展示)  -->
+	<select id="selectMemberRecordByMonths" resultType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto">
+		SELECT year(registerTime) years,
+		month(registerTime)
+		months,
+		day(registerTime) days,
+		COUNT(id)
+		record
+		FROM t_mem_member WHERE
+		<if test="!(registerTime==null)">
+			year(registerTime) = year(#{registerTime,jdbcType=DATE})
+		</if>
+		GROUP BY
+		year(registerTime),
+		month(registerTime),
+		day(registerTime);
+	</select>
+	
+	<!--  会员增值情况视图(按年展示商家端)  -->
+	<select id="selectMemberRecordByYearOfBusiness" resultType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto">
+		SELECT year(registerTime) years,
+		month(registerTime)
+		months,
+		COUNT(id)
+		record
+		FROM t_mem_member WHERE
+		<if test="!(registerTime==null)">
+			year(registerTime) = year(#{registerTime,jdbcType=DATE})
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND storeId=#{storeId}
+		</if>
+		GROUP BY
+		year(registerTime),
+		month(registerTime);
+	</select>
+	
+	<!--  会员增值情况视图(按月展示商家端)  -->
+	<select id="selectMemberRecordByMonthsOfBusiness" resultType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto"
+		parameterType="com.topaiebiz.member.mgmt.dto.MemberStatisticsDto">
+		SELECT year(registerTime) years,
+		month(registerTime)
+		months,
+		day(registerTime) days,
+		COUNT(id)
+		record
+		FROM t_mem_member WHERE
+		<if test="!(registerTime==null)">
+			year(registerTime) = year(#{registerTime,jdbcType=DATE})
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND storeId=#{storeId}
+		</if>
+		GROUP BY
+		year(registerTime),
+		month(registerTime),
+		day(registerTime);
+	</select>
+	
+	<!-- 根据手机号查询用户对象 -->
+	<select id="selectMemberByUserNameOrTelephone" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity"
+		parameterType="String">
+		SELECT
+		id,merchantId,storeId,telephone,userName,password,accountState,version
+		FROM t_mem_member WHERE (telephone = #{username} or userName=#{username}) and  deletedFlag = 0
+	</select>
+	<!-- 根据id查询会员可用积分 -->
+	<select id="selectMemberMgmtByIdSum" resultType="Long"
+		parameterType="Long">
+		SELECT ownScore FROM t_mem_member WHERE id = #{memberId} and  deletedFlag = 0
+	</select>
+	
+	<!-- 根据商家ID查询会员 -->
+	<select id="selectMemberByMerchantId" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity" parameterType="Long">
+		SELECT 
+			id,merchantId,storeId,telephone,userName,password,accountState,version
+		FROM 
+			t_mem_member 
+		WHERE 
+			merchantId = #{merchantId} and  deletedFlag = 0
+		ORDER BY 
+		    createdTime 
+		LIMIT 1
+	</select>
+</mapper>

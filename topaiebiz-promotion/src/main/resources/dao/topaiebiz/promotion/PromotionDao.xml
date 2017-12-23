@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.promotion.mgmt.dao.PromotionDao">
+
+	<!-- 营销活动列表 -->
+	<select id="selectPromotionList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		id,name,
+		createdTime,
+		startTime,
+		endTime,
+		applyStartTime,
+		applyEndTime,
+		discountValue,
+		amount,
+		usedAmount,
+		marketState FROM
+		t_pro_promotion
+		WHERE deletedFlag = 0
+		<if test="!(name==null or name=='')">
+			AND name = #{name}
+		</if>
+		<if test="marketState !=null">
+			AND marketState = #{marketState}
+		</if>
+		<if test="!(typeId==null or typeId=='')">
+			AND typeId = #{typeId}
+		</if>
+		<if test="!(state==null or state=='')">
+			AND state = #{state}
+		</if>
+		ORDER BY createdTime DESC
+	</select>
+
+	<!-- 根据商品sku编号查询所属营销活动 -->
+	<select id="findPromotionByGoodsSkuId" parameterType="Long" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		p.id,p.name,
+		p.gradeId,p.typeId,
+		p.createdTime,
+		p.startTime,
+		p.endTime,
+		p.description,
+		p.isGoodsArea,
+		p.condType,
+		p.condValue,
+		p.discountType,
+		p.discountValue,
+		p.amount,
+		p.usedAmount,
+		p.marketState
+		FROM
+		t_pro_promotion p
+		LEFT JOIN t_pro_promotion_goods g ON p.id = g.promotionId
+		WHERE p.deletedFlag = 0 AND marketState = 2 AND gradeId != 1
+		<if test="!(goodsSkuId==null or goodsSkuId=='')">
+			AND g.goodsSkuId = #{goodsSkuId}
+		</if>
+		UNION
+		SELECT
+		p.id,p.name,
+		p.gradeId,p.typeId,
+		p.createdTime,
+		p.startTime,
+		p.endTime,
+		p.description,
+		p.isGoodsArea,
+		p.condType,
+		p.condValue,
+		p.discountType,
+		p.discountValue,
+		p.amount,
+		p.usedAmount,
+		p.marketState
+		FROM
+		t_pro_promotion p
+		LEFT JOIN t_pro_promotion_goods g ON p.id = g.promotionId
+		WHERE p.deletedFlag = 0 AND marketState = 2 AND gradeId != 1 AND
+		p.isGoodsArea = 1
+	</select>
+
+	<!-- 查询最接近该时间的数据 -->
+	<select id="selectPromotionHomePageSeckill" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		id,
+		sponsorType,
+		NAME,
+		typeId,
+		startTime,
+		endTime,
+		description
+		FROM
+		t_pro_promotion
+		WHERE typeId = 6 AND deletedFlag = 0
+		AND marketState = 2
+		ORDER BY
+		startTime ASC
+	</select>
+
+	<!-- 查询秒杀活动时间集合 -->
+	<select id="selectSeckillStartTimeList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		id,
+		NAME,
+		startTime
+		FROM
+		t_pro_promotion
+		WHERE typeId = 6
+		AND deletedFlag = 0
+		AND endTime > NOW()
+		AND marketState in(1,2)
+		ORDER BY marketState
+		DESC,startTime
+	</select>
+
+	<!-- 定时任务活动开始 时间间隔：1小时 -->
+	<select id="selectPromotionByDate" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT id FROM t_pro_promotion
+		WHERE deletedFlag = 0 AND startTime &lt;= NOW() AND endTime > NOW() AND
+		marketState !=4 AND marketState = 1
+	</select>
+	<!-- 定时任务活动结束 时间间隔：1小时 -->
+	<select id="selectPromotionEnd" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT id FROM t_pro_promotion
+		WHERE deletedFlag = 0 AND endTime &lt;= NOW() AND marketState !=4 AND
+		marketState = 2
+	</select>
+	<!-- 定时任务报名开始 时间间隔：1小时 -->
+	<select id="selectPromotionApplyStart" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT id FROM t_pro_promotion
+		WHERE deletedFlag = 0 AND applyStartTime &lt;= NOW() AND applyEndTime > NOW() AND
+		marketState !=4 AND marketState = 1 AND state = 0
+	</select>
+	<!-- 定时任务报名结束 时间间隔：1小时 -->
+	<select id="selectPromotionApplyEnd" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT id FROM t_pro_promotion
+		WHERE deletedFlag = 0 AND applyEndTime &lt;= NOW() AND state = 1
+	</select>
+
+	<!-- C端查询店铺优惠券 -->
+	<select id="selectPromotionStoreCouponListByStoreId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		id,
+		sponsorType,
+		gradeId,
+		typeId,
+		NAME,
+		startTime,
+		endTime,
+		description,
+		condType,
+		condValue,
+		discountType,
+		discountValue,
+		amount,
+		usedAmount,
+		confineAmount,
+		isGoodsArea
+		FROM
+		t_pro_promotion
+		WHERE deletedFlag = 0
+		AND typeId = 7
+		AND marketState = 2
+		AND sponsorType = #{sponsorType}
+	</select>
+
+	<!-- 平台报名活动列表 -->
+	<select id="selectPlatformEnrolPromotionList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		p.id,
+		p.marketState,
+		g.name AS storeGradeName,
+		p.applyTitle,
+		p.applyStartTime,
+		p.applyEndTime,
+		p.storeGrade,
+		p.typeId,
+		p.NAME,
+		p.startTime,
+		p.endTime,
+		p.state
+		FROM
+		t_pro_promotion p
+		LEFT JOIN t_mer_merchant_grade g ON g.id = p.storeGrade
+		WHERE p.deletedFlag = 0
+		AND p.marketState > 0
+		AND p.state > 0
+		<if test="!(name==null or name=='')">
+			AND p.name = #{name}
+		</if>
+		<if test="marketState !=null">
+			AND p.marketState = #{marketState}
+		</if>
+		<if test="!(startTime==null or startTime=='')">
+			AND p.startTime >= STR_TO_DATE(#{startTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND p.endTime &lt;= STR_TO_DATE(#{endTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		ORDER BY p.lastModifiedTime DESC
+	</select>
+
+	<!-- 发起报名获取活动列表 -->
+	<select id="selectEnrolPromotionList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+			id,
+			typeId,
+			NAME,
+			startTime,
+			endTime,
+			marketState
+		FROM t_pro_promotion
+		WHERE deletedFlag = 0
+		AND marketState = 1
+		AND typeId IN (4, 5, 6) AND state IS NULL
+		<if test="!(name==null or name=='')">
+			AND name = #{name}
+		</if>
+		<if test="!(typeId==null or typeId=='')">
+			AND typeId = #{typeId}
+		</if>
+	</select>
+
+	<!-- 商家营销活动报名列表(全部活动) -->
+	<select id="selectStoreAllPromotionList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		p.id,
+		p.marketState,
+		g.name AS storeGradeName,
+		p.applyTitle,
+		p.applyStartTime,
+		p.applyEndTime,
+		p.storeGrade,
+		p.typeId,
+		p.NAME,
+		p.startTime,
+		p.endTime,
+		p.state
+		FROM
+		t_pro_promotion p
+		LEFT JOIN t_mer_merchant_grade g ON g.id = p.storeGrade
+		WHERE p.deletedFlag = 0
+		AND p.marketState > 0
+		AND p.state > 0
+		<if test="!(name==null or name=='')">
+			AND p.name = #{name}
+		</if>
+		<if test="!(applyStartTime==null or applyStartTime=='')">
+			AND p.applyStartTime >= STR_TO_DATE(#{applyStartTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(applyEndTime==null or applyEndTime=='')">
+			AND p.applyEndTime &lt;= STR_TO_DATE(#{applyEndTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(applyTitle==null or applyTitle=='')">
+			AND p.applyTitle = #{applyTitle}
+		</if>
+		<if test="marketState !=null">
+			AND p.marketState = #{marketState}
+		</if>
+	</select>
+	
+	<!-- 商家营销活动报名列表(已报名活动) -->
+	<select id="selectStoreEnrolPromotionList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionDto">
+		SELECT
+		p.id,
+		p.marketState,
+		g.name AS storeGradeName,
+		p.applyTitle,
+		p.applyStartTime,
+		p.applyEndTime,
+		p.storeGrade,
+		p.typeId,
+		p.NAME,
+		p.startTime,
+		p.endTime,
+		p.state,
+		e.state AS auditState
+		FROM
+		t_pro_promotion p
+		LEFT JOIN t_mer_merchant_grade g ON g.id = p.storeGrade
+		LEFT JOIN t_pro_promotion_entry e ON p.id = e.promotionId
+		WHERE p.deletedFlag = 0
+		AND p.marketState > 0
+		AND p.state > 0 
+		<if test="!(name==null or name=='')">
+			AND p.name = #{name}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND e.storeId = #{storeId}
+		</if>
+		<if test="!(applyStartTime==null or applyStartTime=='')">
+			AND p.applyStartTime >= STR_TO_DATE(#{applyStartTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(applyEndTime==null or applyEndTime=='')">
+			AND p.applyEndTime &lt;= STR_TO_DATE(#{applyEndTime},'%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test="!(applyTitle==null or applyTitle=='')">
+			AND p.applyTitle = #{applyTitle}
+		</if>
+		<if test="marketState !=null">
+			AND p.marketState = #{marketState}
+		</if>
+	</select>
+
+</mapper>

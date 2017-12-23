@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.order.merchant.dao.OrderDetailsDao">
+
+	<!-- 根据订单id查询出订单对应的订单详情 -->
+	<select id="selectOrderDetailByOrderId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+	    SELECT * FROM t_tsa_store_order_detail ttsod WHERE ttsod.orderId=#{id} AND ttsod.deletedFlag = 0
+	</select>
+
+	<!-- 根据订单id查询出订单对应的订单详情 -->
+	<select id="selectlistByOrderId" parameterType="Long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+		SELECT
+		od.id,od.orderId,od.goodsId,od.name,od.goodsNum,od.usedPromotion,od.unitPrice,
+		od.deduction,od.salePrice,od.totalPrice,od.totalFreight,od.goodsImage,od.state,od.logisticsType,
+		od.memo,od.creatorId,od.createdTime,od.deletedFlag,od.version
+		FROM
+		t_tsa_store_order_detail od
+		WHERE
+		od.orderId=#{orderId}
+	</select>
+
+	<!-- 根据营销活动ID查询使用活动记录 -->
+	<select id="selectPromotionCount"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderDetailsDto">
+		SELECT
+		id,
+		orderId,
+		goodsNum,
+		totalPrice,
+		usedPromotion,
+		deduction,
+		salePrice
+		FROM
+		t_tsa_store_order_detail
+		WHERE
+		deletedFlag = 0 AND usedPromotion =
+		#{usedPromotion}
+	</select>
+
+	<!-- 改变状态 -->
+	<update id="updateOrderDetailsStatus">
+		UPDATE t_tsa_store_order_detail SET state = #{state} WHERE id = #{id}
+	</update>
+
+	<!-- 根据营销活动ID查询使用活动记录 -->
+	<select id="selectPromotionGoodsNum"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderDetailsDto">
+
+		SELECT
+		d.id,
+		d.orderId,
+		d.goodsNum,
+		d.totalPrice,
+		d.usedPromotion,
+		d.deduction,
+		d.salePrice
+		FROM
+		t_tsa_store_order_detail d LEFT JOIN t_tsa_store_order o ON d.orderId = o.id
+		WHERE
+		d.deletedFlag = 0 AND d.usedPromotion = #{usedPromotion} AND d.goodsId = #{goodsId}
+		AND o.memberId = #{memberId}
+
+	</select>
+	<!-- 根据订单编号查看订单的发票信息 -->
+
+	<select id="selectOrederInvoiceByOrderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.OrderInvoiceEntity">
+		SELECT
+		id,orderId,storeId,invoiceType,title,taxpayerNo,text,invoiceImage,
+		modeType,`name`,sum,addressTel,account,state,memo,creatorId,invoiceCode,
+		createdTime,lastModifierId,lastModifiedTime,deletedFlag,version,invoiceNum
+		FROM t_tsa_order_invoice
+		WHERE orderId=#{id}
+	</select>
+	
+	
+  	<select id="findOneByPromotionAndSkuId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+ 		SELECT * FROM  t_tsa_store_order_detail WHERE deletedFlag = 0 AND usedPromotion = #{usedPromotionId} AND goodsId = #{goodsId}
+ 	</select>
+ 	
+ 	<!-- 根据订单编号和商品skuId获取店铺订单详情数据 -->
+ 	<select id="selectOrderDetailsByOrderIdAndSkuId" resultType="com.topaiebiz.transaction.order.merchant.dto.OrderDetailsDto">
+		 	SELECT
+			od.id,od.orderId,od.goodsId,od.name,od.goodsNum,od.usedPromotion,od.unitPrice,
+			od.deduction,od.salePrice,od.totalPrice,od.totalFreight,od.goodsImage,od.state,od.logisticsType,
+			od.memo,od.creatorId,od.createdTime,od.deletedFlag,od.version
+			FROM
+			t_tsa_store_order_detail od
+			WHERE
+			od.orderId=#{orderId} AND od.goodsId = #{goodsId}
+ 	</select>
+
+	<!-- 根据商品的skuIds 和 订单ID 查询订单详情集合 -->
+	<select id="getOrderDetailListBySkidsAndOrderId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+        SELECT * FROM t_tsa_store_order_detail AS ttsod
+        WHERE ttsod.deletedFlag = 0
+        AND ttsod.orderId = #{storeOrderId}
+        <if test="skuIds != null">
+            AND ttsod.goodsId IN
+            <foreach item="item" index="index" collection="skuIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+	</select>
+
+	<select id="getOrderDetailByIds" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+		SELECT * FROM t_tsa_store_order_detail AS ttsod WHERE
+		ttsod.id IN
+		<foreach item="item" index="index" collection="orderDetailIds" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		AND ttsod.deletedFlag = 0
+	</select>
+
+	<select id="findByOrderIdAndGoodsId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+		SELECT * FROM t_tsa_store_order_detail AS ttsod WHERE ttsod.orderId = #{orderId} and ttsod.goodsId = #{goodsId}
+	</select>
+
+</mapper>

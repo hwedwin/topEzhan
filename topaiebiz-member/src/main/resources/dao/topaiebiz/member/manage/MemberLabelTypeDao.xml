@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.manage.dao.MemberLabelTypeDao">
+
+
+    <select id="getLabelTypeList" resultType="com.topaiebiz.member.manage.dto.MemberLabelTypeDto">
+      SELECT * FROM t_mem_label_type
+      WHERE deletedFlag = 0
+      ORDER BY sortNo
+    </select>
+
+
+    <select id="selectLabelTypeById" resultType="com.topaiebiz.member.manage.dto.MemberLabelTypeDto">
+      SELECT * FROM t_mem_label_type
+      WHERE deletedFlag = 0
+      AND id = #{typeId}
+    </select>
+
+
+    <select id="selectLabelTypeByName" resultType="com.topaiebiz.member.manage.dto.MemberLabelTypeDto">
+      SELECT * FROM t_mem_label_type
+      WHERE deletedFlag = 0
+      AND typeName = #{typeName}
+    </select>
+
+
+    <select id="selectLabelTypeMaxSortNo" resultType="java.lang.Long">
+      SELECT max(sortNo) FROM t_mem_label_type
+    </select>
+</mapper>

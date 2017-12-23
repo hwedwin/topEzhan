@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.security.dao.SystemUserDao">
+	
+	<select id="selectUserByUsernameOrTelephone" resultType="com.topaiebiz.system.security.entity.SystemUserEntity">
+		SELECT
+			id,username,realname,password,type,confirmPassword,validityDate,lastTwicePassword,emaill,mobilePhone,isAccountNonExpired,deletedFlag,version
+		FROM
+			t_sys_system_user
+		WHERE 
+			(username=#{username} or mobilePhone=#{username}) and password=#{password} and deletedFlag=0
+	</select>
+	
+	<select id="selectUserByTelephone" resultType="com.topaiebiz.system.security.entity.SystemUserEntity">
+		SELECT
+			id,username,realname,password,confirmPassword,type,validityDate,lastTwicePassword,emaill,mobilePhone,isAccountNonExpired,isAccountNonLocked,
+   			isCredentialsNonExpired,isEnabled,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+		FROM
+			t_sys_system_user
+		WHERE 
+			mobilePhone=#{mobilePhone} and deletedFlag=0
+	</select>
+	
+	<select id="selectUserByMember" resultType="com.topaiebiz.system.security.dto.SecurityMemberDto">
+		SELECT
+			*
+		FROM
+			t_mem_member
+		WHERE 
+			(userName=#{username} or telephone=#{username}) and deletedFlag=0
+	</select>
+	
+	<select id="selectUserByUsername" resultType="com.topaiebiz.system.security.entity.SystemUserEntity">
+		SELECT
+			id,username,realname,password,type,confirmPassword,validityDate,lastTwicePassword,emaill,mobilePhone,isAccountNonExpired,deletedFlag,version
+		FROM
+			t_sys_system_user
+		WHERE 
+			(username=#{username} or mobilePhone=#{username}) and deletedFlag=0
+	</select>
+	
+</mapper>

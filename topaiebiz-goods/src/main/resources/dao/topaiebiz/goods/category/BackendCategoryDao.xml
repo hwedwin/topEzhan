@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.category.backend.dao.BackendCategoryDao">
+
+	<!-- 商品后台类目一级类目 -->
+  	<select id="selectListOneLevelBackendCategory" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId FROM t_goo_backend_category 
+  		WHERE parentId = 0 AND deletedFlag = 0 AND id != 1
+  		<if test="!(name==null or name == '')">
+  			AND name like CONCAT('%', #{name}, '%')  
+  		</if>
+  		ORDER BY createdTime DESC 
+  	</select>
+  	
+  	<!-- 商品后台类目二,三级类目 -->
+  	<select id="selectListTwoOrThreeLevelBackendCategory" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id, name,parentId FROM t_goo_backend_category 
+  		WHERE parentId =#{parentId} AND deletedFlag = 0
+  		<if test="!(name == null or name == '')">
+  			AND name like CONCAT('%', #{name}, '%')  
+  		</if>
+  		ORDER BY createdTime DESC
+  	</select>
+  	
+  	<!-- 删除后台类目信息，修改状态 -->
+  	<update id="deleteBackendCategory">
+  		UPDATE t_goo_backend_category SET deletedFlag = 1 WHERE id = #{id}
+  	</update>
+  
+  	<!-- 根据id查询BackendCategory -->
+  	<select id="selectBackendCategoryById" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,description,parentId,level FROM t_goo_backend_category 
+  		WHERE id = #{id} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据id查询BackendCategory -->
+  	<select id="selectBackendCategoryByBackId" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,description,parentId FROM t_goo_backend_category 
+  		WHERE id = #{id} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 通过商家id和第三级类目名称查询商家第三级类目  -->
+  	<select id="selectThreeBackendCategoryDto" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,description,parentId FROM t_goo_backend_category 
+  		WHERE name = #{name} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 平台根据name查询BackendCategory -->
+  	<select id="selectBackendCategoryByName" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT id,name FROM t_goo_backend_category WHERE name = #{name}
+  		AND deletedFlag = 0 
+  	</select>
+  	
+  	<!-- 根据name和id查询BackendCategory -->
+  	<select id="selectBackendCategoryByNameAndId" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name FROM t_goo_backend_category WHERE name = #{name} 
+  		 AND deletedFlag = 0
+  		<if test="!(id == null or id == '')">
+  			AND id != #{id}
+  		</if>
+  	</select>
+  	
+  	<!-- 根据name查询BackendCategory -->
+  	<select id="selectBackendCategoryEntityById" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT id,name,description,parentId,level FROM t_goo_backend_category 
+  		WHERE id = #{id} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 通过上级类目id查询出下级所有类目 -->
+  	<select id="selectAllBackendCategoryById" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT id FROM t_goo_backend_category WHERE parentId=#{parentId}
+  		AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 平台spu查询最近使用类目 -->
+  	<select id="selectRecentlyCategoryList" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+        SELECT gbc.id,gbc.name,gbc.parentId,gbc.level FROM t_goo_backend_category gbc,
+        t_goo_goods_spu gs WHERE gbc.id = gs.belongCategory 
+        AND gs.deletedFlag = 0 AND gbc.deletedFlag = 0 AND gbc.id != 3
+        ORDER BY gs.createdTime DESC LIMIT 10
+  	</select>
+  	
+  	<!-- 平台item查询最近使用类目 -->
+  	<select id="selectItemRecentlyCategoryList" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+        SELECT gbc.id,gbc.name ,gbc.parentId,gbc.level
+        FROM t_goo_backend_category gbc,
+        t_goo_item gi WHERE gbc.id = gi.belongCategory 
+        AND gi.deletedFlag = 0 AND gbc.deletedFlag = 0 AND gbc.id != 3 
+        ORDER BY gi.createdTime DESC LIMIT 10
+  	</select>
+  	
+  	<!-- 商家查询最近使用类目 -->
+  	<select id="selectMerchantItemRecentlyCategoryList" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+        SELECT gbc.id,gbc.name,gbc.parentId,gbc.level FROM t_goo_backend_category gbc,
+        t_goo_item gi WHERE gbc.id = gi.belongCategory 
+        AND gi.deletedFlag = 0 AND gbc.deletedFlag = 0 AND gbc.id != 3
+        ORDER BY gi.createdTime DESC LIMIT 10
+  	</select>
+  	
+  	<!-- 根据商家id查询商品后台三级类目 -->
+  	<select id="selectThreeBackendCategoryDtoByBelongStore" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category
+  		WHERE deletedFlag = 0 AND level = 3
+  	</select>
+  	
+  	<!-- 根据商家id查询商品后台二级类目 -->
+  	<select id="selectTwoBackendCategoryDtoByParentId" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category
+  		WHERE id = #{parentId} AND deletedFlag = 0 AND level = 2
+  	</select>
+  	
+  	<!-- 根据商家id查询商品后台二级类目 -->
+  	<select id="selectOneBackendCategoryDtoByParentId" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category
+  		WHERE id = #{parentId} AND deletedFlag = 0 AND level = 1
+  	</select>
+  	
+  	<!-- 平台查看商品后台第三级类目 -->
+  	<select id="selectThreeBackendCategoryList" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category
+  		WHERE deletedFlag = 0 AND level = 3 AND id != 3
+  	</select>
+  	
+  	<!-- 商家查看商品后台第三级类目 -->
+  	<select id="selectMerchantThreeBackendCategoryList" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category
+  		WHERE deletedFlag = 0 AND level = 3 AND id != 3
+  	</select>
+  	
+  	<!-- 根据后台类目id查询本类目是否为平台类目  -->
+  	<select id="selectBackendCategoryByIdAndBelongStore" resultType="com.topaiebiz.goods.category.backend.dto.BackendCategoryDto">
+  		SELECT id,name FROM t_goo_backend_category 
+        WHERE id = #{id} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据后台类目名称查询商家后台类目 -->
+  	<select id="selectBackendCategoryByNameAndBelongStore" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT id,name FROM t_goo_backend_category 
+        WHERE name = #{name} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据电话查询对应商家店铺   -->
+  	<select id="getMemberByuserTelephone" resultType="com.topaiebiz.goods.category.backend.dto.MerchantStoreDto">
+  		SELECT id,telephone,userName,password,accountState,storeId,merchantId,version
+		FROM t_mem_member WHERE telephone = #{telephone} AND deletedFlag = 0;
+  	</select>
+  	
+  	<!-- 根据商家 id查询对应类目 -->
+  	<select id="selectBackendCategoryByStoreId" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT id,name,parentId,level FROM t_goo_backend_category 
+        WHERE deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据商家 id,父类目查询对应类目 -->
+  	<select id="selectMerchantCategory" resultType="com.topaiebiz.goods.category.backend.dto.BackendMerchantCategoryDto">
+        SELECT
+        	 t1.id,t1.name,t1.parentId,t1.level,t2.merchantId,t2.categoryId 
+        FROM 
+        	 t_goo_backend_category t1 join t_goo_backend_merchant_category  t2 
+        ON 
+        	 t1.id=t2.categoryId  
+        WHERE 
+        	 t2.merchantId=#{merchantId} and t1.parentId=#{parentId}  and t1.deletedFlag = 0 and t2.deletedFlag = 0
+        <if test="!(name==null or name == '')">
+  			AND t1.name like CONCAT('%', #{name}, '%')  
+  		</if>
+  		ORDER BY t1.createdTime DESC 
+  	</select>
+  	
+  	<!-- 商家查询三级类目 -->
+  	<select id="selectMerchantThreeCategory" resultType="com.topaiebiz.goods.category.backend.dto.BackendMerchantCategoryDto">
+        SELECT
+        	 t1.id,t1.name,t1.parentId,t1.level,t2.merchantId,t2.categoryId 
+        FROM 
+        	 t_goo_backend_category t1 join t_goo_backend_merchant_category  t2 
+        ON 
+        	 t1.id=t2.categoryId  
+        WHERE 
+        	 t2.merchantId=#{merchantId}  and t1.deletedFlag = 0 and t2.deletedFlag = 0 and t1.level=3
+  		ORDER BY t1.createdTime DESC 
+  	</select>
+  	
+  	<!-- 根据商家id和类目id查询对应类目 -->
+  	<select id="selectBackendMerchantCategoryById" resultType="com.topaiebiz.goods.category.backend.entity.BackendMerchantCategoryEntity">
+  		SELECT id,merchantId,categoryId 
+  		FROM t_goo_backend_merchant_category WHERE deletedFlag = 0 
+		AND merchantId = #{merchantId} AND categoryId = #{id}
+  	</select>
+  	
+  	<!-- 通过商家id查询商家类目 -->
+  	<select id="selectThreeBackendCategoryDtoByMerchantId" resultType="com.topaiebiz.goods.category.backend.dto.BackendMerchantCategoryDto">
+  		SELECT id,merchantId,categoryId 
+  		FROM t_goo_backend_merchant_category WHERE deletedFlag = 0 
+		AND merchantId = #{merchantId} 
+  	</select>
+  	
+  	<!-- 根据后台类目名称查询商家后台类目 -->
+  	<select id="getAll" resultType="com.topaiebiz.goods.category.backend.entity.BackendCategoryEntity">
+  		SELECT * from  t_goo_backend_category 
+  	</select>
+  	
+  	<!-- 删除后台类目信息，修改状态 -->
+  	<update id="deleteBackendMerchantCategory">
+  		UPDATE t_goo_backend_merchant_category 
+  		SET deletedFlag = 1 WHERE merchantId = #{merchantId} 
+  		AND categoryId = #{category}
+  	</update>
+
+</mapper>

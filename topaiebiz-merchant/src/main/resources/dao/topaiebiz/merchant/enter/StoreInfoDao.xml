@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.StoreInfoDao">
+
+	<!-- 创建店铺后显示店铺的信息 -->
+	<select id="selectStoreInfoById" resultType="com.topaiebiz.merchant.enter.dto.StoreInfoDto">
+		SELECT
+		id,name,districtId,storeAddress,contactName,contactTele,
+		storeTele,description,images
+		FROM
+		t_mer_store_info WHERE id = #{id}
+	</select>
+
+	<!-- 根据loginName回显商家的提交信息 (在线经营范围) -->
+	<select id="selectMerchantTypeByLoginName" resultType="com.topaiebiz.merchant.enter.dto.StoreInfoDto">
+		SELECT
+		b.`merchantId`,b.`id`,
+		a.`merchantType` FROM t_mer_merchant_info a
+		INNER JOIN
+		t_mer_store_info b ON a.`id` = b.`merchantId` WHERE
+		b.`merchantId` = #{id}
+	</select>
+
+	<select id="selectByMerchantId" resultType="com.topaiebiz.merchant.info.entity.StoreInfoEntity">
+		SELECT * from t_mer_store_info where merchantId=#{merchantId} AND deletedFlag=0 ORDER BY createdTime 
+	</select>
+
+</mapper>

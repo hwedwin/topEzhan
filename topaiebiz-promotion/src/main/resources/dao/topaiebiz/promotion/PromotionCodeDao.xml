@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.promotion.mgmt.dao.PromotionCodeDao">
+
+	<!-- 根据营销活动ID删除对应优惠码 -->
+	<select id="deletePromotionCode">
+		DELETE FROM t_pro_promotion_code WHERE promotionId = #{promotionId}
+	</select>
+
+</mapper>

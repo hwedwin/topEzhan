@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.spu.dao.GoodsSpuDao">
+
+	<!-- 商品spu分页检索 -->
+	<select id="selectListGoodsSpuDto" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT s.id,s.spuCode,s.name,s.createdTime, 
+		s.belongCategory,s.belongBrand,
+		b.name AS brandName,c.name AS categoryName
+		FROM t_goo_goods_spu s INNER JOIN t_goo_backend_category c 
+		ON s.belongCategory = c.id AND s.deletedFlag = 0
+		<if test="!(spuCode==null or spuCode=='')">
+			AND s.spuCode = #{spuCode}
+		</if>
+		<if test="!(name==null or name=='')">
+			AND s.name like CONCAT('%', #{name}, '%')
+		</if>
+		<if test="!(belongCategory==null or belongCategory=='')">
+			AND s.belongCategory = #{belongCategory}
+		</if>
+		<if test="!(categoryName==null or categoryName=='')">
+			AND c.name like CONCAT('%', #{categoryName}, '%')
+		</if>
+		INNER JOIN t_goo_brand b ON s.belongBrand = b.id 
+		<if test="!(brandName==null or brandName=='')">
+			WHERE b.name like CONCAT('%', #{brandName}, '%')
+		</if>
+		ORDER BY s.createdTime DESC
+	</select>
+
+	<!-- 逻辑删除商品spu信息 -->
+	<update id="deleteGoodsSpu">
+		UPDATE t_goo_goods_spu SET deletedFlag = 1 WHERE id = #{id}
+	</update>
+
+	<!-- 根据商品spu编号查询商品spu -->
+	<select id="selectGoodsSpuBySpuCode" resultType="com.topaiebiz.goods.spu.entity.GoodsSpuEntity">
+		select id,spuCode,name from t_goo_goods_spu where spuCode = #{spuCode}
+		AND deletedFlag = 0;
+	</select>
+
+	<!-- 根据商品spu名称查询商品spu -->
+	<select id="selectGoodsSpuByName" resultType="com.topaiebiz.goods.spu.entity.GoodsSpuEntity">
+		select id,spuCode,name from t_goo_goods_spu where name = #{name}
+		AND deletedFlag = 0;
+	</select>
+
+	<!-- 根据商品spu编号和id查询商品spu -->
+	<select id="selectGoodsSpuBySpuCodeAndId" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		select id,spuCode,name from t_goo_goods_spu where spuCode = #{spuCode}
+		AND deletedFlag = 0
+		<if test="!(id==null or id=='')">
+			AND id != #{id}
+		</if>
+	</select>
+	<!-- 根据商品spu名称和id查询商品spu -->
+	<select id="selectGoodsSpuByNameAndId" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT id,spuCode,name FROM t_goo_goods_spu WHERE name = #{name}
+		AND deletedFlag = 0
+		<if test="!(id==null or id=='')">
+			AND id != #{id}
+		</if>
+	</select>
+
+	<!-- 根据id查询商品spu信息 -->
+	<select id="selectGoodsSpuById" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT id,spuCode,name,description,defaultPrice,
+		belongBrand,ageId,belongCategory,imageField FROM t_goo_goods_spu
+		WHERE id = #{spuId} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据商品spu的id查询商品spu信息 -->
+	<select id="selectGoodsSpuBySpuId" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT id,spuCode,name FROM t_goo_goods_spu
+		WHERE id = #{spuId} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据类目id查询是否有商品spu -->
+	<select id="selectGoodsSpuByBelongCategory" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT id,name,belongCategory
+		FROM t_goo_goods_spu
+		where belongCategory = #{belongCategory} AND deletedFlag = 0
+	</select>
+
+	<!-- 商家根据商品模板发布商品列表 -->
+	<select id="selectGoodsSpuListByBelongCategory" resultType="com.topaiebiz.goods.spu.dto.GoodsSpuDto">
+		SELECT
+		gs.id,gs.spuCode,gs.NAME,gs.belongCategory,gs.belongBrand,
+		gs.createdTime,gb.NAME brandName,
+		bc.NAME categoryName FROM
+		t_goo_goods_spu gs,t_goo_brand gb,t_goo_backend_category bc WHERE
+		gb.id = gs.belongBrand AND bc.id = gs.belongCategory AND gs.deletedFlag = 0
+		AND gs.belongCategory = #{belongCategory}
+		<if test="!(name==null or name=='')">
+			AND gs.name like CONCAT('%', #{name}, '%')
+		</if>
+	</select>
+
+</mapper>

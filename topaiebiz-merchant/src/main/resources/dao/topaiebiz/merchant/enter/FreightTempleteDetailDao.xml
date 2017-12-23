@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.FreightTempleteDetailDao">
+
+	<!-- 查询运费模板详情 -->
+	<select id="selectOneByFreightId"
+		resultType="com.topaiebiz.merchant.enter.entity.FreightTempleteDetailEntity">
+		SELECT * FROM t_mer_freight_templete_detail WHERE freightId = #{freightId} and deletedFlag = 0
+	</select>
+
+	<!-- 运费模板修改回显 -->
+	<select id="selectMerFreightTempleteById"
+		resultType="com.topaiebiz.merchant.enter.dto.AddFreightTempleteDto">
+		SELECT a.`id`,
+		a.`freightName`,a.`pricing`,b.`firstPrice`,b.`firstNum`,b.`addPrice`,b.`addNum`,b.`districtIdList`
+		FROM t_mer_freight_templete a INNER JOIN t_mer_freight_templete_detail
+		b ON a.`id`=b.`freightId`
+		WHERE a.`id` = #{id}
+	</select>
+
+	<select id="selectFreightTempleteDetailById" resultType="java.lang.Long">
+		SELECT
+		id from t_mer_freight_templete_detail WHERE freightId = #{id}
+	</select>
+
+	<update id="updateByfreightTempleteDetailById">
+		UPDATE t_mer_freight_templete_detail SET
+		firstPrice =
+		#{firstPrice},
+		districtIdList = #{districtIdList},
+		firstNum=
+		#{firstNum},addPrice =
+		#{addPrice},addNum = #{addNum} WHERE id =
+		#{freightId}
+	</update>
+
+	<select id="selectDetailByTeleplateId"
+		resultType="com.topaiebiz.merchant.enter.entity.FreightTempleteDetailEntity">
+		SELECT *
+		from t_mer_freight_templete_detail where
+		deletedFlag=0 and freightId=#{freightId}
+	</select>
+
+	<!-- 根据模板id删除模板详情 -->
+	<update id="deleteByTemplateId">
+         UPDATE t_mer_freight_templete_detail SET deletedFlag = 1 WHERE freightId = #{id}
+	</update>
+
+
+</mapper>

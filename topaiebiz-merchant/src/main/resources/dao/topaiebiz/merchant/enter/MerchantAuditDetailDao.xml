@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.MerchantAuditDetailDao">
+
+	<!-- 审核不通过，查看不通过原因以及不通过字段（回显） -->
+	<select id="getMerchantAuditDetailByMerchantId"
+		resultType="com.topaiebiz.merchant.enter.entity.MerchantAuditDetailEntity">
+		SELECT a.`auditResult`,b.`noPassField`,b.`noPassReason`
+		FROM
+		t_mer_merchant_audit_log a LEFT JOIN t_mer_merchant_audit_detail b
+		ON
+		a.`id` = b.`auditLogId` WHERE a.`id` = #{id}
+	</select>
+	
+	<!-- 审核不通过，查看不通过原因以及不通过字段（回显） -->
+	<select id="selectAuditDetailByLogId" resultType="com.topaiebiz.merchant.enter.entity.MerchantAuditDetailEntity">
+		select * from t_mer_merchant_audit_detail where auditLogId=#{id}
+	</select>
+
+</mapper>

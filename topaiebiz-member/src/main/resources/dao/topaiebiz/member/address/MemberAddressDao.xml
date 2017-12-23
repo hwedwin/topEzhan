@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.address.dao.MemberAddressDao">
+	
+	<!--  删除会员收货地址 (修改状态) -->
+	<update id="deleteMemberAddress" parameterType="Long">
+		UPDATE t_mem_member_address SET deletedFlag = 1 WHERE id = #{id};
+	</update>
+	
+	<!--  修改会员收货地址默认无 -->
+	<update id="updateMemberAddressByMemberId" parameterType="Long">
+		UPDATE t_mem_member_address SET isDefault = 0 WHERE memberId = #{memberId};
+	</update>
+	
+	<!-- 会员收货地址列表  -->
+	<select id="selectMemberAddress" resultType="com.topaiebiz.member.address.dto.MemberAddressDto" parameterType="Long">
+		SELECT id,memberId,name,telephone,districtId,address,isDefault FROM t_mem_member_address WHERE deletedFlag = 0 AND memberId=#{memberId};
+	</select>
+	
+	<!-- 查找出默认收货地址  -->
+	<select id="findDefaultAddressByMemberId" resultType="com.topaiebiz.member.address.entity.MemberAddressEntity">
+		SELECT * FROM t_mem_member_address WHERE memberId = #{memberId} and isDefault = 1 and deletedFlag = 0 limit 0,1;
+	</select>
+</mapper>

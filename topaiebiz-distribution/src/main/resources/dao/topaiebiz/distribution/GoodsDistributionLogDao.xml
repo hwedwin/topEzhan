@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.topaiebiz.distribution.merchant.dao.GoodsDistributionLogDao">
+	<!-- 平台店铺分销记录分页列表加搜索。 -->
+	<select id="getPlatformGoodsDistributionList"
+		resultType="com.topaiebiz.distribution.merchant.dto.GoodsDistributionLogDto">
+		SELECT gdl.id,mmi.name AS merchantName,msi.name AS storeName,
+		msi.contactName
+		AS contactName, msi.contactTele,gdl.distriPrice,gdl.storeId,mg.name AS
+		storeGradeName
+		FROM t_dis_goods_distribution_log
+		gdl,t_mer_merchant_info
+		mmi,t_mer_store_info msi,t_mer_merchant_grade
+		mg
+		WHERE gdl.deletedFlag = 0 AND gdl.merchantId = mmi.id AND
+		gdl.storeId =
+		msi.id and mg.id=gdl.storeGrade
+		<!-- 商家名称 -->
+		<if test="!(merchantName == null || merchantName == '')">
+			AND mmi.name = #{merchantName}
+		</if>
+		<!-- 店铺名称 -->
+		<if test="!(storeName == null || storeName == '')">
+			AND msi.name = #{storeName}
+		</if>
+		<!-- 店铺联系人名称 -->
+		<if test="!(contactName == null || contactName == '')">
+			AND msi.contactName = #{contactName}
+		</if>
+		<!-- 店铺等级 -->
+		<if test="!(storeGradeName == null || storeGradeName == '')">
+			AND mg.name = #{storeGradeName}
+		</if>
+	</select>
+
+	<!-- 通过StoreID查看商拼列表加分页 -->
+	<select id="findGoodsDistributionListByStoreId"
+		resultType="com.topaiebiz.distribution.merchant.dto.GoodsDistributionLogDto">
+		SELECT mm.userName AS
+		userName,gi.name,mdl.distriLevel,mdl.distriDate,mdl.ratio,mdl.goodsNum,mdl.totalPrice,mdl.distriPrice
+		FROM t_dis_member_distribution_log mdl,t_mem_member mm ,t_goo_item
+		gi,t_goo_goods_sku gs
+		WHERE mdl.skuId = #{skuId} AND mm.id =
+		mdl.memberId AND mdl.skuId = gs.id
+		AND gs.itemId = gi.id
+		AND
+		mdl.deletedFlag = 0
+		<if test="!(userName == null || userName == '')">
+			AND mm.userName = #{userName}
+		</if>
+
+	</select>
+
+	<!-- 查看购买人数 -->
+	<select id="findGoodsPeopleBuy" resultType="Integer">
+		SELECT
+		count(distinct
+		so.memberId )
+		FROM t_tsa_store_order_detail
+		sod,t_tsa_store_order so
+		WHERE sod.orderId = so.id AND goodsId =
+		#{skuId}
+	</select>
+
+	<!-- 商家中心店铺分销记录 -->
+	<select id="getMerchantGoodsDistributionLogList"
+		resultType="com.topaiebiz.distribution.merchant.dto.GoodsDistributionLogDto">
+		select gdl.id,gi.name AS
+		itemName,gdl.ratio,gdl.saleNum,gdl.price,gdl.totalPrice,gdl.distriPrice,gdl.distriDate,gdl.skuId
+		from t_dis_goods_distribution_log gdl,t_goo_item gi,t_goo_goods_sku gs
+		where storeId = #{storeId} AND gdl.skuId = gs.id AND gs.itemId = gi.id
+		AND gdl.deletedFlag = 0
+		<if test="!(itemName == null || itemName == '')">
+			AND gi.name = #{itemName}
+		</if>
+		<if test="!(distriDates == null || distriDates == '')">
+			AND gdl.distriDate = STR_TO_DATE(#{distriDates},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+	</select>
+
+	<!-- 通过skuId查询会员购买的分销记录。 -->
+	<select id="findMemberDistributionListByskuId"
+		resultType="com.topaiebiz.distribution.merchant.dto.GoodsDistributionLogDto">
+		SELECT
+	     mm.userName AS userName,gi.name AS
+		itemName,mdl.distriLevel,mdl.distriDate,mdl.ratio,mdl.goodsNum,mdl.totalPrice,mdl.distriPrice
+		FROM
+		 t_dis_member_distribution_log mdl,t_mem_member mm ,t_goo_item
+		gi,t_goo_goods_sku gs
+		WHERE
+		 mdl.skuId = #{skuId} AND mm.id =
+		mdl.memberId AND mdl.skuId = gs.id
+		AND gs.itemId = gi.id AND
+		mdl.deletedFlag = 0
+		<if test="!(userName == null || userName == '')">
+			AND mm.userName = #{userName}
+		</if>
+	</select>
+
+	<!-- 根据商品id查询商家的分销金额 -->
+	<select id="selectGoodsDistributionLogByStoreId"
+		resultType="com.topaiebiz.distribution.merchant.entity.GoodsDistributionLogEntity">
+		SELECT
+		id,distriPrice
+		FROM
+		t_dis_goods_distribution_log gdl
+		WHERE
+		storeId = #{storeId} AND deletedFlag = 0
+	</select>
+
+	<!--根据店铺id,skuId查询分销平台商品的每一个分销比例。 -->
+	<select id="getStoreDisRatioByStoreAndSkuId" resultType="Double">
+	select
+	  ratio  AS storedistriRatio
+		from
+		t_dis_goods_distribution_log dl
+		where
+		dl.storeId=#{storeId} and dl.skuId=#{skuId}
+	</select>
+	
+	<!-- 根据店铺id,skuId查询分销平台商品的分销金额。 -->
+	<select id="getStoreDisPriceByStoreAndSkuId" resultType="Double">
+	select
+	 sum(dl.distriPrice) AS storedistriPrice
+		from
+		t_dis_goods_distribution_log dl
+		where
+		dl.storeId=#{storeId} and dl.skuId=#{skuId}
+	</select>
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.sms.dahantc.dao.CaptchaDao">
+
+	<!-- 根据电话查询 -->
+	<select id="selectByTelephone" resultType="com.topaiebiz.sms.dahantc.entity.CaptchaEntity">
+		SELECT 
+	    	id,telephone,captcha,lapseTime,lastModifiedTime,deletedFlag,version 
+	    FROM 
+	    	t_captcha 
+	    WHERE 
+	    	deletedFlag=0 and telephone=#{telephone}
+	</select>
+	
+</mapper>

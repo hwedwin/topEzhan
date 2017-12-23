@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.MerchantInfoDaos">
+
+	<!-- 根据账户查询商家入驻状态 -->
+	<select id="getMerchantInfoStateByLoginName"
+		resultType="com.topaiebiz.merchant.info.entity.MerchantInfoEntity">
+		SELECT
+		a.`state` FROM t_mer_merchant_info a LEFT JOIN
+		t_mer_merchant_store_persion b ON a.`contactName` = b.`loginName`
+		WHERE b.`loginName` = #{loginName}
+	</select>
+
+	<!-- 根据用户 -->
+	<select id="getMerchantInfoStateByLoginNames"
+		resultType="com.topaiebiz.merchant.info.entity.MerchantInfoEntity">
+		SELECT
+		a.`state` FROM t_mer_merchant_info a LEFT JOIN
+		t_mer_merchant_store_persion b ON a.`contactName` = b.`loginName`
+		WHERE b.`loginName` = #{loginName}
+	</select>
+
+	<!-- 根据状态去查商家的id。 -->
+	<select id="selectMerchantInfoByState"
+		resultType="com.topaiebiz.merchant.info.entity.MerchantInfoEntity">
+		SELECT a.`id` FROM t_mer_merchant_info a WHERE a.`state`=
+		#{state}
+	</select>
+
+	<!-- 添加缴费凭证图片 -->
+	<update id="updateMerchantInfoByState">
+		UPDATE t_mer_merchant_info SET payImage = #{payImage}
+		WHERE merchantId = #{merchantId}
+	</update>
+
+	<select id="selectMerchantInfoByMerchantId"
+		resultType="com.topaiebiz.merchant.info.entity.MerchantInfoEntity">
+		SELECT * FROM
+		t_mer_merchant_info WHERE id =
+		#{loginName}
+	</select>
+
+	<update id="selectByUpdate">
+		UPDATE t_mer_merchant_info SET state = 3 WHERE id =
+		#{id}
+	</update>
+
+	<update id="selectByIds">
+		UPDATE t_mer_merchant_info SET state = 5 WHERE id =
+		#{id}
+	</update>
+
+	<update id="updateByIds">
+		UPDATE t_mer_merchant_info SET state = 4 WHERE id =
+		#{id}
+	</update>
+	
+	<update id="updateMerchantStatus">
+		UPDATE t_mer_merchant_info SET state = #{state} WHERE id =#{id}
+	</update>
+
+</mapper> 

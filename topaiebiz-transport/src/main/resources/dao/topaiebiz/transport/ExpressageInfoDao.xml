@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transport.expressage.dao.ExpressageInfoDao">
+	
+	<!-- 根据单号查询快递信息 -->
+	<select id="selectExpressageInfo" resultType="com.topaiebiz.transport.expressage.entity.ExpressageInfoEntity">
+		SELECT
+			nu,com,isCheck,data,lastModifiedTime,deletedFlag
+		FROM 
+			t_exp_expressage_info
+		WHERE
+			nu=#{number} AND deletedFlag = 0
+		ORDER BY
+			lastModifiedTime DESC
+		LIMIT
+		    1
+	</select>
+
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.dict.dao.DataDictDao">
+
+	<!-- 数据字典类型下拉框展示供添加数据字典信息时选择 -->
+	<select id="selectDataDictTypeById" resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT
+		id,typeName FROM t_sys_data_dict_type WHERE
+		deletedFlag = 0 ORDER BY
+		createdTime DESC
+	</select>
+
+	<!-- 数据字典的编码进行重复验证 -->
+	<select id="selectDataDictByDictCode" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT
+		id,dictCode FROM t_sys_data_dict WHERE
+		dictCode =
+		#{dictCode}
+		AND
+		deletedFlag =
+		0  AND id != #{id}
+	</select>
+	
+	<!-- 数据字典的编码进行重复验证 -->
+	<select id="selectDataDictByDictCodes" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT
+		id,dictCode FROM t_sys_data_dict WHERE
+		dictCode =
+		#{dictCode}
+		AND
+		deletedFlag =
+		0  AND id != #{id}
+	</select>
+	
+
+	<!-- 对数据字典的值重复验证 -->
+	<select id="selectDataDictByDictValue" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT
+		id,dictValue FROM t_sys_data_dict WHERE
+		dictValue =
+		#{dictValue}
+		AND
+		deletedFlag =
+		0  AND id != #{id}
+	</select>
+    
+    <!-- 对数据字典的值重复验证 -->
+    <select id="selectDataDictByDictValues" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT
+		id,dictValue FROM t_sys_data_dict WHERE
+		dictValue =
+		#{dictValue}
+		AND
+		deletedFlag =
+		0  AND id != #{id}
+	</select>
+    
+	<!-- 查看数据字典信息(根据Id查看数据字典信息数据回显)。 -->
+	<select id="selectDataDictById" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT id,
+		typeId,dictCode,dictValue,memo FROM
+		t_sys_data_dict
+		WHERE id = #{id} AND
+		deletedFlag =
+		0
+	</select>
+
+	<!-- 数据字典信息列表分页检索 -->
+	<select id="selectDataDictList" resultType="com.topaiebiz.system.dict.entity.DataDictEntity">
+		SELECT id, typeId,dictCode,dictValue,memo FROM
+		t_sys_data_dict
+		WHERE
+		deletedFlag = 0
+		<if test="!(dictCode==null or dictCode=='')">
+			and dictCode = #{dictCode}
+		</if>
+		<if  test="!(typeId==null or typeId=='')">
+			and typeId = #{typeId}
+		</if>
+		<if  test="!(dictValue==null or dictValue=='')">
+			and dictValue = #{dictValue}
+		</if>
+	</select>
+
+	<!-- 批量删除（修改状态）数据字典信息 -->
+	<delete id="deleteDataDictByIds">
+		UPDATE t_sys_data_dict SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 删除数据字典（修改状态） -->
+	<delete id="deleteDataDictById">
+		UPDATE t_sys_data_dict SET deletedFlag = 1
+		WHERE id =
+		#{id}
+	</delete>
+
+</mapper>

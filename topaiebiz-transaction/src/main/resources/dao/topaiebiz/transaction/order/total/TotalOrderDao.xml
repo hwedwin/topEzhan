@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.order.total.dao.TotalOrderDao">
+  
+    <!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+	
+	<!-- 平台订单分页，查询列表 -->
+	<select id="selectPlatformOrder" resultType="com.topaiebiz.transaction.order.total.dto.PlatformPayOrderLogDto">
+		SELECT 
+		po.id,po.orderType,mi.userName,po.totalPrice,po.platformDeduction,
+		po.integralPrice,po.payPrice,po.payState,po.payType as platformPayType 
+		FROM 
+		t_tsa_platform_order po 
+		LEFT JOIN t_mem_member mi on mi.id=po.memberId 
+		<where>
+			<if test="orderType!=null">
+				po.orderType = #{orderType}
+			</if>
+			<if test="payState!=null">
+				po.payState = #{payState}
+			</if>
+			<if test="userName!=null and userName!=''">
+				mi.userName = #{userName}
+			</if>
+			<if test="platformPayType!=null and platformPayType!=''">
+				po.payType = #{platformPayType}
+			</if>
+		</where>
+		ORDER BY po.payTime DESC
+	</select>
+	
+	<!-- 根据营销活动id查询对应使用订单的条数 -->
+	<select id="selectPlatformPromotionCount" resultType="java.lang.Integer">
+		SELECT count(1) FROM t_tsa_total_order po
+		<where>
+			<if test="platformPromotion!=null">
+				po.platformPromotion = #{platformPromotion}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据三方支付记录id查询指定表的指定字段 -->
+	<select id="selectPlatformOrderId" resultType="com.topaiebiz.transaction.order.total.dto.PlatformPayOrderLogDto">
+		SELECT 
+		po.id,po.orderType,mi.userName,po.totalPrice,po.platformDeduction,
+		po.integralPrice,po.payPrice,po.payState,po.payType as platformPayType,
+		po.cardPrice,po.payTime
+		FROM 
+		t_tsa_platform_order po 
+		LEFT JOIN t_mem_member mi on mi.id=po.memberId 
+		WHERE po.id = #{id}
+	</select>
+	
+	<!-- 改变状态 -->
+ 	<update id="updateStoreOrderStatus" >
+  		UPDATE  t_tsa_store_order SET orderState = #{orderState} WHERE id = #{id}
+  	</update>
+ 
+ 	<select id="findTotalOrderById" resultType="com.topaiebiz.transaction.order.total.dto.PlatformPayOrderLogDto">
+ 	
+ 		SELECT 
+		id,orderType,totalPrice,platformDeduction,
+		integralPrice,payPrice,payState,payType 
+		FROM 
+		t_tsa_platform_order WHERE deletedFlag = 0 AND id = #{id}
+ 	
+ 	</select>
+ 
+ 	<!-- 获取#{days}天之类的订单 -->
+ 	<select id="getTotalOrderByParams" resultType="com.topaiebiz.transaction.order.total.entity.TotalOrderEntity">
+ 		SELECT * FROM t_tsa_total_order as ttto 
+ 		where deletedFlag = 0 
+ 		<if test="orderStroeType > 0">
+			AND ttto.id in (select ttso.totalOrderNo from t_tsa_store_order as ttso where ttso.deletedFlag = 0 and ttso.orderType = #{orderStroeType}) 
+		</if>
+ 		<if test="days > 0">
+ 			AND DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+ 		</if>
+       <if test="!(beforDate==null or beforDate=='')">
+			AND ttto.createdTime &gt;=
+			STR_TO_DATE(#{beforDate},'%Y-%m-%d')
+		</if>
+		<if test="!(afterDate==null or afterDate=='')">
+			AND ttto.createdTime &lt;=
+			STR_TO_DATE(#{afterDate},'%Y-%m-%d')
+		</if>
+ 	</select>
+ 	
+ 	<!-- 获取订单总价的价格区分数量 -->
+ 	<select id="getTotalPriceRange" resultType="com.topaiebiz.transaction.order.total.dto.TotalOrderPriceRangeDto">
+	 	select tttoresult.priceRange as rangeStr,count(*) as count FROM
+		(select CASE WHEN ttto.payPrice &gt;= 0 AND ttto.payPrice &lt;= 50 THEN '0-50'
+		            WHEN ttto.payPrice &gt;= 51 AND ttto.payPrice &lt;= 100 THEN '51-100'
+		            WHEN ttto.payPrice &gt;= 101 AND ttto.payPrice &lt;= 200 THEN '101-200'
+		            WHEN ttto.payPrice &gt;= 201 AND ttto.payPrice &lt;= 500 THEN '201-500'
+		            WHEN ttto.payPrice &gt;= 501 AND ttto.payPrice &lt;= 1000 THEN '501-1000'
+		            WHEN ttto.payPrice &gt;= 1001 AND ttto.payPrice &lt;= 5000 THEN '1001-5000'
+		            WHEN ttto.payPrice &gt;= 5001 AND ttto.payPrice &lt;= 10000 THEN '5001-10000'
+		            ELSE '10001'
+				 END as priceRange from t_tsa_total_order as ttto WHERE ttto.deletedFlag = 0 
+ 		<if test="orderStroeType > 0">
+			AND ttto.id in (select ttso.totalOrderNo from t_tsa_store_order as ttso where ttso.deletedFlag = 0 and ttso.orderType = #{orderStroeType}) 
+		</if>
+		<if test="days > 0">
+			AND DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+	 	</if>
+       	<if test="!(beforDate==null or beforDate=='')">
+			AND ttto.createdTime &gt;=
+			STR_TO_DATE(#{beforDate},'%Y-%m-%d')
+		</if>
+		<if test="!(afterDate==null or afterDate=='')">
+			AND ttto.createdTime &lt;=
+			STR_TO_DATE(#{afterDate},'%Y-%m-%d')
+		</if>
+		) as tttoresult GROUP BY tttoresult.priceRange ORDER BY tttoresult.priceRange 
+ 	</select>
+ 
+ 	<!-- 查询前#{beforDate-afterDate}日期之间的的订单 -->
+ 	<select id="getBeforDaysDataComparison" resultType="com.topaiebiz.transaction.order.total.entity.TotalOrderEntity">
+ 		select * from t_tsa_total_order as ttto WHERE ttto.deletedFlag = 0 
+ 		<if test="orderStroeType > 0">
+			AND ttto.id in (select ttso.totalOrderNo from t_tsa_store_order as ttso where ttso.deletedFlag = 0 and ttso.orderType = #{orderStroeType}) 
+		</if>
+ 		<if test="beforDate!=null">
+			AND date(ttto.createdTime) &gt;= date(#{beforDate,jdbcType=DATE})
+		</if>
+		<if test="afterDate!=null">
+			AND date(ttto.createdTime) &lt;= date(#{afterDate,jdbcType=DATE})
+		</if>
+ 	</select>
+ 
+</mapper>

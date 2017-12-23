@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.manage.dao.MemberGradeManagerDao">
+
+    <select id="selectGradeList" resultType="com.topaiebiz.member.manage.dto.MemberGradeInfoDto">
+        SELECT a.*
+        FROM t_mem_member_grade a
+        WHERE a.deletedFlag = 0
+    </select>
+
+
+    <select id="selectGradeInfoByGradeCode" resultType="com.topaiebiz.member.manage.dto.MemberGradeInfoDto">
+        SELECT a.*
+        FROM t_mem_member_grade a
+        WHERE a.deletedFlag = 0
+        <if test="!(gradeCode==null or gradeCode=='')">
+            AND a.gradeCode=#{gradeCode}
+        </if>
+    </select>
+</mapper>

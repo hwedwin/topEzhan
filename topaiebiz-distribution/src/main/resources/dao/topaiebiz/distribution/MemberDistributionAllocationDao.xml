@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.distribution.member.dao.MemberDistributionAllocationDao">
+
+	<!-- 查询店铺订单数据 订单状态为6 orderState=6表示已完成 ，查询前一天的订单 TO_DAYS(NOW())，不包含退货的金额，退货的状态为退货退款state 
+		= 0 -->
+	<select id="selectStoreOrderList"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		   	SELECT
+		ts.id,ts.memberId,ts.storeId,ts.orderTime,ts.orderState,td.goodsNum,td.salePrice,td.goodsId
+		FROM t_tsa_store_order ts,t_tsa_store_order_detail td
+		WHERE td.orderId
+		= ts.id AND ts.orderState=6 AND ts.deletedFlag = 0
+		AND ts.id not
+		in(select storeOrderId
+		from t_tsa_refund_order
+		where deletedFlag = 0 AND
+		state = 0)
+		AND TO_DAYS(NOW())- TO_DAYS(ts.orderTime) &lt;=1
+	</select>
+
+	<select id="selectAllMemberById" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity">
+		SELECT
+		me.memberCode,me.storeId,me.parentId,me.id
+		FROM t_mem_member me
+		WHERE
+		me.parentId=#{memberId} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据goodsId和分销级别查询下级会员的分销比例 -->
+	<select id="findMemberDistributionRabioByGoodsId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionAllocationDto">
+		SELECT da.id,da.ratio,da.storeId,da.distriLevel
+		FROM
+		t_dis_member_distribution_allocation da
+		WHERE skuId=#{goodsId} AND
+		distriLevel ="1"
+	</select>
+	<!-- 根据会员id查询已经购买完了的商品 -->
+	<select id="findGoodsById"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT
+		td.goodsId,ta.memberId,td.goodsNum,td.salePrice,ta.storeId,ta.id,td.name
+		FROM t_tsa_store_order ta, t_tsa_store_order_detail td
+		WHERE
+		td.orderId=ta.id AND ta.deletedFlag = 0 AND ta.memberId = #{memberId}
+		AND ta.orderState=6
+	</select>
+
+	<!-- 根据goodsId和分销级别查询下级会员的分销比例 -->
+	<select id="findMembersDistributionRabioByGoodsId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionAllocationDto">
+		SELECT da.id,da.ratio,da.storeId,da.distriLevel
+		FROM
+		t_dis_member_distribution_allocation da
+		WHERE skuId=#{goodsId} AND
+		distriLevel ="2"
+	</select>
+
+	<!-- 根据会员和商品查询购买人数 -->
+	<select id="selectUnderlingMemberNums"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT
+		td.goodsId,ta.memberId,td.goodsNum,td.salePrice,ta.storeId,ta.id,td.name
+		FROM t_tsa_store_order ta, t_tsa_store_order_detail td
+		WHERE
+		td.orderId=ta.id AND ta.deletedFlag = 0 AND ta.memberId = #{memberId1}
+		AND ta.orderState=6 AND td.goodsId = #{goodsId}
+	</select>
+	
+	<!-- 根据会员和商品查询购买人数 -->
+	<select id="findMemberDistributionAllocationBySkuId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionAllocationDto">
+			SELECT id,distriLevel,ratio,skuId,storeId
+			FROM t_dis_member_distribution_allocation 
+        	WHERE skuId=#{skuId} AND storeId = #{storeId} AND deletedFlag =0
+	</select>
+	
+	<!-- 删除商品分销记录 -->
+	<update id="deleteMemberDistributionAllocation">
+		UPDATE t_dis_member_distribution_allocation SET
+		deletedFlag=1 WHERE id = #{id}
+	</update>
+	
+</mapper>

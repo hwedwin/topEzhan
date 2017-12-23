@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.category.frontend.dao.FrontBackCategoryDao">
+  	
+	<!-- 删除绑定类目 -->
+	<update id="deleteFrontBackCategory">
+		UPDATE t_goo_front_back_category SET deletedFlag = 1 WHERE id = #{id}
+	</update>
+	
+	<!-- 查询前后台绑定表 -->
+	<select id="selectAllFrontBackCategoryById" resultType="com.topaiebiz.goods.category.frontend.entity.FrontBackCategoryEntity">
+		SELECT id,frontId,backId FROM t_goo_front_back_category 
+		WHERE deletedFlag = 0 AND frontId = #{id}
+	</select>
+	
+	<!-- 根据backId查询前后台绑定表 -->
+	<select id="selectFrontBackCategoryByBackId" resultType="com.topaiebiz.goods.category.frontend.dto.FrontBackCategoryDto">
+		SELECT id,frontId,backId FROM t_goo_front_back_category 
+		WHERE deletedFlag = 0 AND backId = #{backId}
+	</select>
+	
+	<!-- 查询前后台绑定表 -->
+	<select id="selectFrontBackCategory" resultType="com.topaiebiz.goods.category.frontend.dto.FrontBackCategoryDto">
+		SELECT id,frontId,backId FROM t_goo_front_back_category 
+		WHERE frontId = #{frontId} AND backId = #{backId} AND deletedFlag = 0
+	</select>
+	
+	<!-- app端根据前台第三级类目id查询出关联的后台类目 -->
+	<select id="selectFrontBackCategoryByFrontId" resultType="com.topaiebiz.goods.category.frontend.entity.FrontBackCategoryEntity">
+		SELECT id,frontId,backId FROM t_goo_front_back_category 
+		WHERE deletedFlag = 0
+  		AND frontId = #{frontendId}
+	</select>
+	
+</mapper>

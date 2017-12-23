@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.payment.order.moble.dao.MobleStoreOrderDetailDao">
+
+  	<select id="findMobleStoreOrderDetailByOrderId" resultType="com.topaiebiz.payment.order.moble.entity.StoreOrderDetailEntity">
+ 		SELECT * FROM  t_tsa_store_order_detail WHERE deletedFlag = 0 AND orderId = #{orderId}
+ 	</select>
+  
+  	<select id="findOneByPromotionAndSkuId" resultType="com.topaiebiz.payment.order.moble.entity.StoreOrderDetailEntity">
+ 		SELECT * FROM  t_tsa_store_order_detail WHERE deletedFlag = 0 AND usedPromotion = #{usedPromotionId} AND goodsId = #{goodsId}
+ 	</select>
+
+
+    <!-- APP：获取订单详情列表 -->
+    <select id="findOrderDetailList" resultType="com.topaiebiz.payment.order.moble.entity.StoreOrderDetailEntity">
+        SELECT * from t_tsa_store_order_detail AS ttsod
+        WHERE ttsod.deletedFlag = 0
+        AND ttsod.orderId = #{storeOrderId}
+        <if test="orderDetailsIds != null">
+            AND ttsod.id IN
+            <foreach item="item" index="index" collection="orderDetailsIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- 获取待发货的订单详情集合-->
+    <select id="getWaitToDeliverGoods" resultType="com.topaiebiz.goods.sku.dto.StoreOrderDetailDto">
+        SELECT
+        ttsod.id AS id,
+        ttsod.name AS name
+        from t_tsa_store_order_detail as ttsod
+        WHERE ttsod.deletedFlag = 0
+        AND ttsod.orderId = #{storeOrderId}
+        AND ttsod.state = 2
+    </select>
+
+  
+</mapper>

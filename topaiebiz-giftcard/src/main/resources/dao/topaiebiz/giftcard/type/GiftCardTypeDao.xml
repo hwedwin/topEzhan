@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.giftcard.type.dao.GiftCardTypeDao">
+
+
+	<sql id="type">
+		id,name,description,creatorId,createdTime,lastModifierId,
+		lastModifiedTime,deletedFlag,version
+	</sql>
+	<!-- 查询礼卡经营类型列表 -->
+	<select id="selectType" resultType="com.topaiebiz.giftcard.type.entity.CardTypeEntity">
+		SELECT
+		<include refid="type" />
+		FROM t_gif_giftcard_type WHERE deletedFlag = 0;
+	</select>
+	<!-- 礼卡经营类型询条件+分页 -->
+
+	<select id="selectTypePage" parameterType="com.topaiebiz.giftcard.type.dto.CardTypeDto"
+		resultType="com.topaiebiz.giftcard.type.entity.CardTypeEntity">
+		SELECT
+		<include refid="type" />
+		FROM t_gif_giftcard_type WHERE deletedFlag=0
+		<if test="!(name==null or name=='')">
+			AND name=#{name}
+		</if>
+		ORDER BY id DESC
+	</select>
+
+
+	<!-- 礼卡经营类型信息的批删 -->
+
+	<update id="deleteTypeOfBeach" >
+	<![CDATA[ 
+        UPDATE t_gif_giftcard_type deletedFlag=1 WHERE id IN
+          ]]>
+		<foreach collection="array" item="type" open="(" separator=","
+			close=")">
+			#{type}
+		</foreach>
+	</update>
+
+	<select id="selectByName" parameterType="com.topaiebiz.giftcard.type.entity.CardTypeEntity"
+		resultType="com.topaiebiz.giftcard.type.entity.CardTypeEntity">
+		SELECT
+		<include refid="type" />
+		FROM t_gif_giftcard_type WHERE name=#{name} AND id !=#{id}
+	</select>
+</mapper>

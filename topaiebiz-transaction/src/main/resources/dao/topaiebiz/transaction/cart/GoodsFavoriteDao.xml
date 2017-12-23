@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.cart.dao.GoodsFavoriteDao">
+  
+    <!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+	
+	<!-- 根据会员id，sku最小单元商品id，查询当前会员购物车中是否存在此商品 -->
+	<select id="selectByMemberItemId" resultType="com.topaiebiz.transaction.cart.entity.GoodsFavoriteEntity">
+		SELECT 
+		id
+		FROM t_tsa_goods_favorite pf 
+		WHERE memberId = #{memberId} 
+		AND goodsId = #{itemId} AND deletedFlag = 0
+	</select>
+	
+	<!-- 根据会员id查询会员收藏夹 -->
+	<select id="selectGoodsFavoriteByMemberId" resultType="com.topaiebiz.transaction.cart.entity.GoodsFavoriteEntity">
+		SELECT id FROM t_tsa_goods_favorite pf 
+		WHERE memberId = #{memberId}  AND deletedFlag = 0
+	</select>
+	
+	<!-- 查询此商品是否被选为收藏 -->
+	<select id="selectGoodsFavoriteByMemberIdAndItemId" resultType="com.topaiebiz.transaction.cart.dto.GoodsFavoriteDto">
+		SELECT id FROM t_tsa_goods_favorite pf 
+		WHERE memberId = #{memberId} AND goodsId = #{itemId} AND deletedFlag = 0
+	</select>
+	
+	<!-- 根据id删除购物车中指定的商品 -->
+	<update id="deleteGoodsFavorite">
+		UPDATE t_tsa_goods_favorite SET deletedFlag = 1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+ 
+</mapper>

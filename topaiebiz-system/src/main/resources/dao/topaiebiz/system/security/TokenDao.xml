@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.moble.security.dao.TokenDao">
+
+	<!-- 根据用户名查询token信息 -->
+	<select id="selectByTelephone"
+		resultType="com.topaiebiz.system.moble.security.entity.TokenEntity">
+		SELECT
+		id,telephone,appToken,type,moreLogin,lastModifiedTime,deletedFlag,version
+		FROM
+		t_app_token
+		WHERE
+		telephone=#{telephone} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据token查询token信息 -->
+	<select id="selectByToken"
+		resultType="com.topaiebiz.system.moble.security.entity.TokenEntity">
+		SELECT
+		id,telephone,appToken,type,moreLogin,lastModifiedTime,deletedFlag,version
+		FROM
+		t_app_token
+		WHERE
+		appToken=#{token} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据token查询token详细信息信息 -->
+	<select id="selectDetailByToken" resultType="com.topaiebiz.system.moble.security.dto.TokenDto">
+		SELECT
+			t.appToken,t.telephone,m.id as memberId,m.storeId from t_app_token t 
+		JOIN
+			t_mem_member m on t.telephone=m.telephone 
+		WHERE
+			t.appToken=#{token} and  m.deletedFlag=0  and t.deletedFlag=0
+	</select>
+
+</mapper>

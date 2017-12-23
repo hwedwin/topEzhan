@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.order.merchant.dao.StoreOrderDao">
+
+	<!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+
+
+    <!-- PC：获取订单列表 -->
+	<select id="getOrderListInPc" resultType="com.topaiebiz.transaction.order.merchant.dto.PCOrderListResultDto">
+        SELECT
+        ttso.id AS orderId,
+        ttso.orderTime AS orderTime,
+		ttso.storeId AS storeId,
+		tmsi.merchantId as merchantId,
+        tmsi.name AS storeName,
+        ttoa.name AS customerName,
+        ttoa.telephone AS customerPhone,
+        ttso.orderState AS orderState,
+        ttso.lastPrice AS lastPrice,
+        ttso.orderType AS orderType,
+		ttso.actualFreight AS actualFreight,
+        ttso.lastModifiedTime
+        from t_tsa_store_order AS ttso
+        <if test="goodsName != null and goodsName != ''">
+            LEFT JOIN t_tsa_store_order_detail AS ttsod ON ttso.id = ttsod.orderId
+        </if>
+        LEFT JOIN t_mer_store_info AS tmsi ON ttso.storeId = tmsi.id
+        LEFT JOIN t_tsa_order_address AS ttoa ON ttso.id = ttoa.orderId
+        WHERE ttso.deletedFlag = 0
+        <if test="orderType != null">
+            AND ttso.orderType = #{orderType}
+        </if>
+        <if test="id != null">
+            AND ttso.id = #{id}
+        </if>
+        <if test="orderState != null">
+            AND ttso.orderState = #{orderState}
+        </if>
+        <if test="belongStore != null">
+            AND ttso.storeId = #{belongStore}
+        </if>
+        <if test="goodsName != null and goodsName != ''">
+            AND ttsod.deletedFlag = 0 AND LOCATE(#{goodsName},ttsod.name) > 0
+        </if>
+        ORDER BY ttso.lastModifiedTime DESC,ttso.orderTime DESC
+    </select>
+
+	<!-- APP：获取订单列表 -->
+    <select id="getOrderListInAPP" resultType="com.topaiebiz.transaction.order.merchant.dto.APPOrderListResultDto">
+		SELECT
+		ttso.id AS orderId,
+		ttso.orderState AS orderState,
+		ttso.refundState AS refundState,
+		ttso.storeId AS storeId,
+		ttso.actualFreight AS actualFreight,
+		ttso.lastPrice AS lastPrice,
+		ttso.orderTime AS orderTime,
+		ttso.lastModifiedTime,
+		ttso.totalOrderNo AS totalOrderNo,
+		ttso.memberId
+		from t_tsa_store_order AS ttso
+		WHERE ttso.deletedFlag = 0
+		<if test="memberId != null">
+			AND ttso.memberId = #{memberId}
+		</if>
+		<if test="orderStateArray != null">
+			AND TTSO.orderState IN
+			<foreach item="item" index="index" collection="orderStateArray" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY ttso.lastModifiedTime DESC,ttso.orderTime DESC
+    </select>
+
+	<!-- APP：获取退货/退款订单列表 -->
+	<select id="getRefundOrderListInAPP" resultType="com.topaiebiz.transaction.order.merchant.dto.APPOrderListResultDto">
+		SELECT
+		ttso.id AS orderId,
+		ttso.orderState AS orderState,
+		ttso.storeId AS storeId,
+		ttso.actualFreight AS actualFreight,
+		ttso.lastPrice AS lastPrice,
+		ttso.orderTime AS orderTime,
+		ttso.lastModifiedTime,
+		ttso.memberId
+		from t_tsa_store_order AS ttso
+		WHERE ttso.deletedFlag = 0
+		<if test="memberId != null">
+			AND ttso.memberId = #{memberId}
+		</if>
+		<if test="orderStateArray != null">
+			AND TTSO.orderState IN
+			<foreach item="item" index="index" collection="orderStateArray" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY ttso.lastModifiedTime DESC,ttso.orderTime DESC
+	</select>
+
+
+
+	<!-- 指定多表多个字段根据订单id查询 -->
+	<select id="selectByIdDto" parameterType="long"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT
+		so.id,so.orderTime,so.orderState,so.totalFreight,so.lastPrice,so.deliveryType,
+		so.storeId,so.productTotal,so.orderTotal,so.usedPromotion,so.storeDeduction,
+		si.name as storeName,
+		oa.name as
+		consigneeName,oa.telephone,oa.landline,
+		mi.userName,
+		oi.invoiceType,oi.title,oi.taxpayerNo
+		FROM t_tsa_store_order so
+		LEFT
+		JOIN t_tsa_order_address oa ON so.id=oa.orderId
+		LEFT JOIN
+		t_mer_store_info si ON so.storeId=si.id
+		LEFT JOIN t_mem_member mi ON
+		so.memberId=mi.memberCode
+		LEFT JOIN
+		t_tsa_order_invoice oi ON
+		so.id=oi.orderId
+		<where>
+			<if test="id!=null">
+				so.id=#{id}
+			</if>
+		</where>
+	</select>
+
+	<!-- 订单dto分页 -->
+	<select id="selectByOrderListDtoList" resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT DISTINCT
+		so.id,so.orderTime,so.orderState,so.totalFreight,so.storeDeduction,so.orderType,
+		so.lastPrice,so.deliveryType,so.storeId,so.orderTotal,so.actualFreight,
+		si.name as storeName,t.platformDeduction,
+		oa.name as
+		consigneeName,oa.telephone,oa.landline,mi.userName
+		FROM
+		t_tsa_store_order so
+		LEFT JOIN t_tsa_order_address oa ON
+		so.id=oa.orderId
+		LEFT JOIN t_mer_store_info si ON so.storeId=si.id
+		LEFT
+		JOIN t_mem_member mi ON so.memberId=mi.memberCode
+		LEFT JOIN
+		t_tsa_total_order t ON t.id=so.totalOrderNo
+		WHERE so.deletedFlag=0
+		<if test="!(orderId==null || orderId==0)">
+			AND so.id=#{orderId}
+		</if>
+		<if test="orderState!=null and orderState !=3">
+			AND so.orderState=#{orderState}
+		</if>
+		<if test="orderState!=null and orderState ==3">
+			AND (so.orderState=3 OR so.orderState=4)
+		</if>
+		<if test="!(userName==null || userName=='')">
+			AND oa.name=#{userName}
+		</if>
+		<if test="deliveryType!=null">
+			AND so.deliveryType=#{deliveryType}
+		</if>
+		<if test="!(goodsName ==null || goodsName =='')">
+			AND so.id IN (SELECT DISTINCT orderId FROM
+			t_tsa_store_order_detail
+			WHERE name=#{goodsName})
+		</if>
+		<if test="!(storeId==null)">
+			AND so.storeId=#{storeId}
+		</if>
+		<if test="storeId==null">
+			AND so.orderType=1
+		</if>
+		<if test="!(memberId == null)">
+			AND so.memberId=#{memberId}
+		</if>
+		ORDER BY so.orderTime DESC
+	</select>
+
+	<!-- 查看平台系统的店铺订单管理 -->
+	<select id="selecttoreOrderList"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT DISTINCT
+		so.id,so.orderTime,so.orderState,so.totalFreight,so.storeDeduction,so.orderType,
+		so.lastPrice,so.deliveryType,so.storeId,so.orderTotal,so.actualFreight,
+		si.name as storeName,t.platformDeduction,
+		oa.name as
+		consigneeName,oa.telephone,oa.landline,mi.userName
+		FROM
+		t_tsa_store_order so
+		LEFT JOIN t_tsa_order_address oa ON
+		so.id=oa.orderId
+		LEFT JOIN t_mer_store_info si ON so.storeId=si.id
+		LEFT
+		JOIN t_mem_member mi ON so.memberId=mi.memberCode
+		LEFT JOIN
+		t_tsa_total_order t ON t.id=so.totalOrderNo
+		WHERE so.deletedFlag=0
+		<if test="!(orderId==null || orderId==0)">
+			AND so.id=#{orderId}
+		</if>
+		<if test="orderState!=null and orderState !=3">
+			AND so.orderState=#{orderState}
+		</if>
+		<if test="orderState!=null and orderState ==3">
+			AND (so.orderState=3 OR so.orderState=4)
+		</if>
+		<if test="!(userName==null || userName=='')">
+			AND oa.name=#{userName}
+		</if>
+		<if test="deliveryType!=null">
+			AND so.deliveryType=#{deliveryType}
+		</if>
+		<if test="!(goodsName ==null || goodsName =='')">
+			AND so.id IN (SELECT DISTINCT orderId FROM
+			t_tsa_store_order_detail
+			WHERE name=#{goodsName})
+		</if>
+		<if test="!(storeId==null)">
+			AND so.storeId=#{storeId}
+		</if>
+		<if test="storeId==null">
+			AND so.orderType=2
+		</if>
+		<if test="!(memberId == null)">
+			AND so.memberId=#{memberId}
+		</if>
+		ORDER BY so.orderTime DESC
+	</select>
+
+	<!-- 根据商品名称查询订单号 -->
+	<select id="selectOrderIdByGoodName" parameterType="String"
+		resultType="java.lang.Long">
+		SELECT DISTINCT orderId FROM t_tsa_store_order_detail WHERE
+		name=#{goodsName}
+	</select>
+
+	<!-- 根据订单id修改订单详情中的收货地址 -->
+	<update id="updateAddressInvoice"
+		parameterType="com.topaiebiz.transaction.order.merchant.dto.OrderAddressInvoiceDto">
+		UPDATE t_tsa_order_address
+		SET
+		name = #{consigneeName},
+		address = #{address},
+		districtId = #{districtId},
+		telephone=#{telephone}
+		WHERE orderId= #{orderId}
+	</update>
+
+	<!-- 批量修改逻辑删除标识。仅且仅有0和1两个值，1表示已经被逻辑删除，0表示正常可用 -->
+	<update id="updateDeletedFlag">
+		UPDATE t_tsa_store_order
+		SET
+		deletedFlag = 1
+		WHERE id IN
+		<foreach collection="array" item="label" open="(" separator=","
+			close=")">
+			#{label}
+		</foreach>
+	</update>
+
+	<!-- 根据店铺订单详情表使用营销活动查询买家 -->
+	<select id="selectStoreOrder"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT DISTINCT
+		o.memberId
+		FROM
+		t_tsa_store_order o
+		LEFT JOIN
+		t_tsa_store_order_detail d ON o.id = d.orderId
+		WHERE
+		o.deletedFlag = 0
+		AND d.usedPromotion = #{detailUsedPromotion}
+	</select>
+
+	<!-- 店铺订单使用营销活动查询买家 -->
+	<select id="selectStoreOrderBuyersNum"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT DISTINCT memberId
+		FROM
+		t_tsa_store_order
+		WHERE
+		deletedFlag = 0
+		AND usedPromotion = #{usedPromotion}
+	</select>
+
+	<!-- 店铺订单使用包邮营销活动查询买家 -->
+	<select id="selectStoreOrderFreightPromotionBuyersNum"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT DISTINCT memberId
+		FROM
+		t_tsa_store_order
+		WHERE
+		deletedFlag = 0
+		AND usedPromotion = #{usedPromotion}
+	</select>
+
+	<!-- 根据支付订单号查询店铺订单集合 -->
+	<select id="selectByTotalOrderId" parameterType="long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.StoreOrderEntity">
+		SELECT
+		id, orderType, memberId, storeId, orderTime,
+		orderState, invoiceState,
+		checkTime, deliveryType, productTotal,
+		totalFreight,
+		freightPromotion, actualFreight, orderTotal,
+		usedPromotion, storeDeduction, lastPrice,
+		totalOrderNo, memo
+		FROM
+		t_tsa_store_order
+		WHERE
+		totalOrderNo=#{totalOrderId} AND deletedFlag = 0
+	</select>
+
+	<!-- 改变状态 -->
+	<update id="updateStoreOrderStatus">
+		UPDATE t_tsa_store_order SET orderState =
+		#{orderState} WHERE id = #{id}
+	</update>
+
+	<!-- 根据订单编号查询配送地址信息 -->
+	<select id="selectAddressByOrderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.OrderAddressEntity">
+		SELECT id,name,address,telephone,districtId FROM
+		t_tsa_order_address WHERE
+		orderId=#{id}
+	</select>
+
+	<!-- 根据营销活动查询店铺订单使用 -->
+	<select id="findStoreOederByUsedPromotion"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT
+		id,
+		memberId,
+		storeId,
+		deliveryType,
+		productTotal,
+		totalFreight,
+		freightPromotion,
+		actualFreight,
+		orderTotal,
+		usedPromotion,
+		storeDeduction,
+		lastPrice,
+		totalOrderNo
+		FROM
+		t_tsa_store_order WHERE
+		deletedFlag = 0 AND usedPromotion = #{usedPromotion}
+
+	</select>
+
+	<!-- 根据订单编号查看订单详情 -->
+	<select id="selectOrderInfoById" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT
+		so.id,so.orderTime,so.orderState,so.storeDeduction,so.lastModifiedTime,
+		t.platformDeduction,t.payCallbackNo,t.id AS totalOrderNo,si.name as
+		storeName,so.lastPrice,so.orderTotal,so.memo,so.totalFreight,so.actualFreight
+		FROM
+		t_tsa_store_order so
+		LEFT JOIN
+		t_tsa_total_order t ON
+		t.id=so.totalOrderNo
+		LEFT JOIN
+		t_mer_store_info si
+		ON so.storeId=si.id
+		WHERE so.deletedFlag=0 AND
+		so.id=#{orderId}
+
+	</select>
+
+	<select id="selectDeliveryByOrderId" parameterType="java.lang.Long" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderAddressEntity">
+		SELECT name,address,telephone FROM t_tsa_order_address
+		WHERE
+		orderId=#{orderId}
+	</select>
+
+	<update id="markDeliveryByorderId">
+		UPDATE t_tsa_store_order_detail SET
+		logisticsType=#{arg3},logisticsNo=#{arg2},state=3
+		WHERE orderId=#{arg1}
+		AND goodsId=#{arg0}
+	</update>
+   <!-- 查看订单中商品的数量 -->
+   <select id="selectGoodsCountByOrderId" parameterType="java.lang.Long" resultType="java.lang.Long">
+   SELECT SUM(goodsNum) AS number FROM t_tsa_store_order_detail WHERE orderId=#{orderId}
+   </select>
+   
+	<select id="selectStoreOrderByUsedPromotion" resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+
+		SELECT
+		id,
+		orderType,
+		memberId,
+		storeId,
+		orderTime,
+		orderState,
+		invoiceState,
+		checkTime,
+		deliveryType,
+		productTotal,
+		totalFreight,
+		freightPromotion,
+		actualFreight,
+		orderTotal,
+		usedPromotion,
+		storeDeduction,
+		lastPrice
+		FROM
+		t_tsa_store_order
+		WHERE
+		memberId =
+		#{memberId}
+		AND usedPromotion =
+		#{usedPromotion}
+
+	</select>
+
+	<select id="findStoreOederByFreightPromotion" resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT
+		id,
+		memberId,
+		storeId,
+		deliveryType,
+		productTotal,
+		totalFreight,
+		freightPromotion,
+		actualFreight,
+		orderTotal,
+		usedPromotion,
+		storeDeduction,
+		lastPrice,
+		totalOrderNo
+		FROM
+		t_tsa_store_order WHERE
+		deletedFlag = 0 AND freightPromotion = #{freightPromotion}
+	</select>
+
+	<!-- 删除订单 -->
+	<update id="deleteStoreOrderByOrderId">
+		UPDATE t_tsa_store_order SET deletedFlag=1 WHERE
+		id=#{orderId}
+	</update>
+
+
+	<!-- 名字重复selectStoreOrderByMemberId -->
+	<select id="selectStoreOrderByMemberId" resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT DISTINCT
+		so.id,so.orderTime,so.orderState,so.totalFreight,so.storeDeduction,
+		so.lastPrice,so.totalOrderNo,so.deliveryType,so.storeId,so.orderTotal,so.actualFreight,
+		si.name as
+		storeName,t.platformDeduction,
+		oa.name as
+		consigneeName,oa.telephone,oa.landline,mi.userName
+		FROM
+		t_tsa_store_order so
+		LEFT JOIN t_tsa_order_address oa ON so.id=oa.orderId
+		LEFT JOIN t_mer_store_info si ON so.storeId=si.id
+		LEFT JOIN t_mem_member mi ON so.memberId=mi.memberCode
+		LEFT JOIN t_tsa_total_order t ON t.id=so.totalOrderNo
+		WHERE
+		so.deletedFlag=0
+		<if test="!(memberId == null)">
+			AND so.memberId=#{memberId}
+		</if>
+		<if test="orderState == 5 ">
+			AND (so.orderState=5 OR so.orderState=6)
+		</if>
+		<if test="orderState!=null and orderState !=3 and orderState != 6">
+			AND so.orderState=#{orderState}
+		</if>
+		<if test="orderState!=null and orderState ==3">
+			AND (so.orderState=3 OR so.orderState=4)
+		</if>
+
+		ORDER BY so.orderTime DESC
+	</select>
+
+
+	<select id="selectStoreOrderByMember"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.OrderListDto">
+		SELECT
+		so.id,so.orderTime,so.orderState,so.totalFreight,so.storeDeduction,
+		so.lastPrice,so.totalOrderNo,so.deliveryType,so.storeId,so.orderTotal,so.actualFreight,
+		si.name as
+		storeName,t.platformDeduction,
+		oa.name as
+		consigneeName,oa.telephone,oa.landline,mi.userName
+
+		FROM
+		t_tsa_store_order so
+		LEFT JOIN t_tsa_order_address oa ON
+		so.id=oa.orderId
+		LEFT JOIN t_mer_store_info si ON so.storeId=si.id
+		LEFT
+		JOIN t_mem_member mi ON so.memberId=mi.memberCode
+		LEFT JOIN
+		t_tsa_total_order t ON t.id=so.totalOrderNo
+
+		WHERE
+		so.deletedFlag=0
+		<if test="!(memberId == null)">
+			AND so.memberId=#{memberId}
+		</if>
+		<if test="orderState != null ">
+			AND (so.orderState=5 OR so.orderState=6)
+		</if>
+		ORDER BY so.orderTime DESC
+	</select>
+
+	<!-- 根据订单号和商品ID查询该商品是否已经评价 -->
+	<select id="getGoodsSkuCommentEntity"
+		parameterType="com.topaiebiz.goods.comment.entity.GoodsSkuCommentEntity"
+		resultType="com.topaiebiz.goods.comment.entity.GoodsSkuCommentEntity">
+		SELECT id FROM t_goo_goods_sku_comment WHERE
+		orderId=#{orderId} AND
+		skuId=#{skuId}
+	</select>
+
+	<!-- -->
+	<select id="selectList" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+		SELECT id,orderId,name FROM t_tsa_store_order_detail WHERE
+		orderId=#{orderId} AND state=2
+	</select>
+
+	<!-- 查询所有收货距今已满七天的订单 -->
+	<select id="selectReceivedOrder"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.StoreOrderEntity">
+		SELECT id,lastModifiedTime FROM t_tsa_store_order WHERE
+		orderState= 5 AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) >=
+		date(lastModifiedTime);
+	</select>
+
+	<!-- 获取当天的订单集合 -->
+	<select id="getTodayOrderList"
+		resultType="com.topaiebiz.transaction.order.merchant.entity.StoreOrderEntity">
+		SELECT * FROM t_tsa_store_order AS ttso WHERE
+		TO_DAYS(ttso.createdTime) = TO_DAYS(NOW()) AND ttso.deletedFlag = 0;
+	</select>
+
+	<!-- 根据店铺编号查询店铺信息 -->
+	<select id="selectStoreByStoreId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreDto">
+		SELECT merchantId FROM t_mer_store_info WHERE id=#{storeId}
+	</select>
+
+	<!-- 根据商家ID查询商家信息 -->
+	<select id="selectMerchantByMerchantId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreDto">
+		SELECT name AS merchantName FROM t_mer_merchant_info WHERE
+		id=#{merchantId}
+	</select>
+
+	<!-- 查询所有订单的数量 -->
+	<select id="getOrderAllCount"
+		resultType="Integer">
+		SELECT COUNT(id) FROM t_tsa_store_order WHERE 1=1
+		<if test="storeId != null">
+		AND storeId=#{storeId}
+		</if>
+		<if test="storeId == null">
+		AND orderType=1
+		</if>
+		
+	</select>
+
+	<!-- 查询代付款的订单的数量 -->
+	<select id="getOrderObligationCount"
+		resultType="Integer">
+		SELECT COUNT(id) FROM t_tsa_store_order WHERE 1=1
+		<if test="storeId != null">
+		AND storeId=#{storeId}
+		</if>
+		<if test="storeId == null">
+		AND orderType=1
+		</if>
+		AND orderState=1
+	</select>
+
+	<!-- 查询代发货的订单的数量 -->
+	<select id="getOrderShipmentCount" 
+		resultType="Integer">
+		SELECT COUNT(id) FROM t_tsa_store_order WHERE 1=1
+		<if test="storeId != null">
+		AND storeId=#{storeId}
+		</if>
+		<if test="storeId == null">
+		AND orderType=1
+		</if>
+		AND orderState=2
+	</select>
+
+    <!-- 查询代收货的订单的数量 -->
+	<select id="getOrderReceivedCount"
+		resultType="Integer">
+		SELECT COUNT(id) FROM t_tsa_store_order WHERE 1=1
+		<if test="storeId != null">
+		AND storeId=#{storeId}
+		</if>
+		<if test="storeId == null">
+		AND orderType=1
+		</if>
+		AND (orderState=3 OR orderState=4)
+	</select>
+
+	<select id="selectByOrderId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderDetailsEntity">
+		SELECT * FROM t_tsa_store_order_detail AS ttsod where ttsod.orderId = #{orderId} AND deletedFlag = 0
+	</select>
+</mapper>

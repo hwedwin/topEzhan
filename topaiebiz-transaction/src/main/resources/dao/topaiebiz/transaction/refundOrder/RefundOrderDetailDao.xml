@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.refundOrder.dao.RefundOrderDetailDao">
+
+	<select id="selectRefundOrderDetailByOrderId" resultType="com.topaiebiz.transaction.refundOrder.dto.RefundOrderDetailDto">
+		SELECT
+		id,
+		orderId,
+		goodsId,
+		NAME,
+		FieldValue,
+		goodsImage,
+		goodsNum,
+		totalPrice,
+		state,
+		logisticsType,
+		logisticsNo,
+		memo
+		FROM
+		t_tsa_refund_order_detail WHERE orderId = #{orderId}
+	</select>
+
+    <select id = "deleteRefundOrderDetail">
+        DELETE FROM t_tsa_refund_order_detail WHERE orderId = #{refundOrderId}
+    </select>
+
+    <!-- 根据售后订单ID 查询所有附属的售后详情订单 -->
+	<select id="selectOrderDetailByRefundOrderId" resultType="com.topaiebiz.transaction.refundOrder.entity.RefundOrderDetailEntity">
+		SELECT * FROM t_tsa_refund_order_detail WHERE orderId = #{refundOrderId} AND deletedFlag = 0
+	</select>
+
+    <!-- 获取退款订单详情列表 -->
+    <select id="findRefundOrderDetailList" resultType="com.topaiebiz.transaction.refundOrder.entity.RefundOrderDetailEntity">
+        SELECT * from t_tsa_refund_order_detail AS ttrod
+        WHERE ttrod.deletedFlag = 0
+        AND ttrod.orderId = #{refundOrderId}
+        <if test="refundOrderDetailIds != null">
+            AND ttrod.id IN
+            <foreach item="item" index="index" collection="refundOrderDetailIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <!--查询商品最近申请的售后订单-->
+	<select id="findByStoreOrderIdAndGoodsId" resultType="com.topaiebiz.transaction.refundOrder.entity.RefundOrderDetailEntity">
+		SELECT * FROM t_tsa_refund_order_detail AS ttrod
+		WHERE ttrod.deletedFlag = 0
+		AND ttrod.orderId IN (SELECT id FROM t_tsa_refund_order AS ttro WHERE ttro.storeOrderId = #{storeOrderId} AND ttro.deletedFlag = 0)
+		AND ttrod.goodsId = #{goodsId}
+	</select>
+
+    <!--查询订单详情售后申请次数-->
+    <select id="findRefundOrderByOrderDetailId" resultType="com.topaiebiz.transaction.refundOrder.entity.RefundOrderDetailEntity">
+        SELECT * from t_tsa_refund_order_detail AS  ttsod WHERE ttsod.storeOrderDetailId = #{orderDetailId} AND ttsod.deletedFlag = 0;
+    </select>
+
+</mapper>

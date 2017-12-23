@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.dict.dao.DataDictTypeDao">
+
+	<!-- 删除数据字典类型（修改状态） -->
+	<delete id="deleteDataDictTypeById">
+		UPDATE t_sys_data_dict_type SET deletedFlag = 1
+		WHERE id =
+		#{id}
+	</delete>
+
+	<!-- 查看数据字典类型(根据Id查看数据字典类型数据回显) -->
+	<select id="selectDataDictTypeById"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT
+		id,
+		typeCode,typeName,description FROM
+		t_sys_data_dict_type WHERE ID =
+		#{ID}
+	</select>
+
+	<!-- 数据字典类型分页检索 -->
+	<select id="selectDataDictTypeList"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT
+		id,typeCode,typeName,description FROM
+		t_sys_data_dict_type
+		where
+		deletedFlag = 0
+		<if  test="!(typeCode==null or typeCode=='')">
+			and typeCode = #{typeCode}
+		</if>
+		<if  test="!(typeName==null or typeName=='')">
+			and typeName = #{typeName}
+		</if>
+	</select>
+
+	<!-- 批量删除数据字典 -->
+	<delete id="deleteDataDictTypeByIds">
+
+		UPDATE t_sys_data_dict_type SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+
+	</delete>
+
+	<!-- 根据数据字典类型名称查出数据字典数据。 -->
+	<select id="selectDataDictTypeByTypeName"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT id,typeName FROM t_sys_data_dict_type WHERE
+		typeName = #{typeName}
+		AND deletedFlag =
+		0 AND id != #{id}
+	</select>
+
+	<!--根据数据字典唯一的编码查出数据字典类型的数据。 -->
+	<select id="selectDataDictTypeByTypeCode"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT id,typeCode FROM t_sys_data_dict_type WHERE
+		typeCode = #{typeCode}
+		AND deletedFlag =
+		0 AND id != #{id}
+	</select>
+
+    
+    <!-- 根据数据字典类型名称查出数据字典数据。 -->
+	<select id="selectDataDictTypeByTypeNames"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT id,typeName FROM t_sys_data_dict_type WHERE
+		typeName = #{typeName}
+		AND deletedFlag =
+		0 AND id != #{id}
+	</select>
+
+	<!--根据数据字典唯一的编码查出数据字典类型的数据。 -->
+	<select id="selectDataDictTypeByTypeCodes"
+		resultType="com.topaiebiz.system.dict.entity.DataDictTypeEntity">
+		SELECT id,typeCode FROM t_sys_data_dict_type WHERE
+		typeCode = #{typeCode}
+		AND deletedFlag =
+		0 AND id != #{id}
+	</select>
+
+</mapper>

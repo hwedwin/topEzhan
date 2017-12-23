@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.system.district.dao.DistrictDao">
+
+	<!-- 查询所有的区域数据 -->
+	<select id="selectOneLevelDistrict" resultType="com.topaiebiz.system.district.entity.DistrictEntity">
+		SELECT * FROM t_sys_district WHERE parentDistrictId = 0 and 
+		deletedFlag = 0 ORDER BY
+		createdTime DESC
+	</select>
+	
+	<!-- 查询所有的区域数据 -->
+	<select id="selectOneLevelById" resultType="com.topaiebiz.system.district.entity.DistrictEntity">
+		SELECT * FROM t_sys_district WHERE parentDistrictId = 0 and 
+		deletedFlag = 0 and id=#{id}
+	</select>
+	
+	<!-- 根据一级和二级区域查询是否存在 -->
+	<select id="selectByIdAndParentId" resultType="com.topaiebiz.system.district.entity.DistrictEntity">
+		SELECT * FROM t_sys_district WHERE parentDistrictId = #{parentId} and 
+		deletedFlag = 0 and id=#{id}
+	</select>
+	
+
+
+	<!-- 根据code查询一条区域数据 -->
+	<select id="selectOneByCode" resultType="com.topaiebiz.system.district.entity.DistrictEntity">
+		SELECT * FROM t_sys_district WHERE code = #{code} and deletedFlag = 0 
+	</select>
+
+	<!-- 查询所有的区域数据 -->
+	<select id="selectAllDistrict" resultType="com.topaiebiz.system.district.entity.DistrictEntity">
+		SELECT * FROM t_sys_district WHERE
+		deletedFlag = 0 ORDER BY
+		createdTime DESC
+	</select>
+
+	<!-- 查询所有的子区域的数据 -->
+	<select id="selectChildDistrict" resultType="com.topaiebiz.system.district.dto.DistrictDto">
+		SELECT tsd.id, tsd.code, tsd.fullName, tsd.shortName, tsd.districtTypeId, tsdt.name as districtTypeName, tsd.parentDistrictId, tsd.parentDistrictName, 
+		tsd.isoTwoAlphabetCode, tsd.isoThreeAlphabetCode, tsd.isoThreeNumericCode, tsd.serialNo, tsd.serialName, 
+		tsd.isoLanguageCode, tsd.isoLanguageName, tsd.phoneAreaCode, tsd.description, tsd.memo FROM t_sys_district as tsd LEFT JOIN t_sys_district_type as tsdt ON tsd.districtTypeId = tsdt.id
+		WHERE parentDistrictId = #{parentDistrictId} and tsd.deletedFlag = 0 ORDER BY tsd.createdTime DESC
+	</select>
+	
+	<!-- 逻辑删除单条区域数据  -->
+	<delete id="deleteDistrictById">
+		UPDATE t_sys_district SET deletedFlag = 1
+		WHERE id =
+		#{id}
+	</delete>
+	
+
+</mapper>

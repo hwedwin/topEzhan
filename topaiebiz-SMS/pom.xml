@@ -1,0 +1,93 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<!-- 表示当前项目采用的POM模型版本是4.0.0。 -->
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- 表示topaiebiz-system项目是topaiebiz-parent项目的子项目或模块。 -->
+	<parent>
+		<groupId>com.topaiebiz</groupId>
+		<artifactId>topaiebiz-parent</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+
+	<!-- topaiebiz-SMS项目的基础信息。 -->
+	<artifactId>topaiebiz-SMS</artifactId>
+	<name>topaiebiz-SMS</name>
+	<description>Topaiebiz智能电子商务平台的子平台 - 短信发送平台。</description>
+
+	<!-- topaiebiz-system项目的依赖库列表。 -->
+	<dependencies>
+		<!-- Nebula PaaS软件快速研发平台SSM基础框架的快速启动器，以Spring Boot, MyBatis, MyBatis Plus, 
+			Alibaba Druid等技术为基础构建。 -->
+		<dependency>
+			<groupId>com.nebulapaas</groupId>
+			<artifactId>nebula-paas-ssmyb-sysmgt</artifactId>
+		</dependency>
+		<!--此处并不是直接使用spring提供的redis-starter-->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<!-- 关系型数据库MySQL的JDBC连接驱动的依赖库。 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<!-- 临时引用本地的jar包，大汉三通的 -->
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dahantc</groupId>
+			<artifactId>dahantc-http-json-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+		  <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ezmorph</groupId>
+            <artifactId>ezmorph</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.38</version>
+		</dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+
+	</dependencies>
+
+	<!-- topaiebiz-system项目的构建配置信息。 -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.point.dao.MemberCouponDao">
+
+	<!-- 提供订单优惠券使用(更改状态)   -->
+	<update id="usageMemberCoupon" parameterType="com.topaiebiz.member.point.dto.MemberCouponDto">
+		UPDATE t_mem_member_coupon set usageState = 1 WHERE memberId=#{memberId} AND couponId=#{couponId};
+	</update>
+	<!-- 查询会员优惠券未使用 -->
+	<select id="selectMemberCoupon" resultType="com.topaiebiz.member.point.dto.MemberPromotionDto" parameterType="Long">
+		SELECT b.id promotionId,name,startTime,endTime,condType,condValue,discountValue,marketState,description,usageState FROM t_mem_member_coupon a LEFT JOIN t_pro_promotion b ON a.couponId=b.id WHERE usageState = 0 AND endTime &gt; NOW() AND  memberId=#{memberId};
+	</select>
+	<!--  查询会员优惠券已使用 -->
+	<select id="selectUsageMemberCoupon" resultType="com.topaiebiz.member.point.dto.MemberPromotionDto" parameterType="Long">
+		SELECT b.id promotionId,name,startTime,endTime,condType,condValue,discountValue,marketState,description,usageState FROM t_mem_member_coupon a LEFT JOIN t_pro_promotion b ON a.couponId=b.id WHERE usageState = 1 AND memberId=#{memberId};
+	</select> 
+	<!-- 查询会员优惠券已过期 -->
+	<select id="selectExpireMemberCoupon" resultType="com.topaiebiz.member.point.dto.MemberPromotionDto" parameterType="Long">
+		SELECT b.id promotionId,name,startTime,endTime,condType,condValue,discountValue,marketState,description,usageState FROM t_mem_member_coupon a LEFT JOIN t_pro_promotion b ON a.couponId=b.id WHERE usageState = 0 AND endTime &lt; NOW() AND memberId=#{memberId};
+	</select>
+	<!--  查询会员优惠券总数 -->
+	<select id="selectMemberCouponSum" resultType="Long" parameterType="Long">
+		SELECT count(b.id) promotionId FROM t_mem_member_coupon a LEFT JOIN t_pro_promotion b ON a.couponId=b.id WHERE usageState = 0 AND endTime &gt; NOW() AND memberId=#{memberId};
+	</select>
+	<!-- 根据会员编号和活动id查询会员领取记录 -->
+	<select id="selectCouponByMemberIdAndPromotionId" resultType="com.topaiebiz.member.point.dto.MemberCouponDto">
+		SELECT id,memberId,usageState,couponId,storeId,receiverTime FROM t_mem_member_coupon WHERE memberId = #{memberId} AND couponId = #{couponId};
+	</select>
+</mapper>

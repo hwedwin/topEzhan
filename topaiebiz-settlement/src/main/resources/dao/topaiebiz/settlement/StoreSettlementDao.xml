@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.settlement.store.dao.StoreSettlementDao">
+
+	<!-- 平台端店铺销售结算。 -->
+	<select id="selectPlatformGoodsDistributionList"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		sss.id,si.name storeName,mi.name
+		merchantName,sss.settleStartDate,
+		sss.settleStartDate,sss.cashSum,sss.pointSum,sss.cardSum,sss.saleSum,
+		sss.distSum,sss.promStoreSum,sss.promPlatformSum,sss.cardStoreSubsidy,
+		sss.cardPlatformSubsidy,sss.memberDistPrice,sss.settlePrice,sss.settleType,
+		sss.state,sss.storeId,sss.paymentChannelCommission,sss.platformCommission,sss.distributorsCommission
+		FROM
+		t_set_store_settlement sss,t_mer_store_info si,t_mer_merchant_info
+		mi
+		WHERE
+		sss.deletedFlag = 0 AND sss.merchantId = mi.id AND sss.storeId
+		= si.id AND sss.settleType=1
+		<if test="!(storeName == null || storeName == '')">
+			AND si.name = #{storeName}
+		</if>
+		<if test="!(merchantName == null || merchantName == '')">
+			AND mi.name = #{merchantName}
+		</if>
+	</select>
+	<!-- 商家端店铺销售结算 -->
+	<select id="selectMerchantStoreSettlementList"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		mmi.name AS merchantName
+		,msi.name storeName
+		,sss.settleEndDate
+		,sss.settleStartDate
+		,sss.cardSum
+		,sss.cashSum,
+		sss.distSum
+		,sss.saleSum
+		,sss.promStoreSum
+		,sss.promPlatformSum
+		,sss.cardStoreSubsidy
+		,sss.cardPlatformSubsidy,
+		sss.memberDistPrice,
+		sss.storeId,
+		sss.paymentChannelCommission
+		,sss.platformCommission
+		,sss.distributorsCommission
+		FROM
+		t_set_store_settlement
+		sss,t_mer_merchant_info mmi,t_mer_store_info msi
+		WHERE
+		sss.deletedFlag =
+		0 AND mmi.id = sss.merchantId AND sss.settleType = 1
+		AND msi.id =
+		sss.storeId AND sss.merchantId = #{merchantId}
+		<if test="!(storeName == null || storeName == '')">
+			AND msi.name = #{storeName}
+		</if>
+	</select>
+	<!-- 查询店铺订单对应的 优惠后金额、美礼卡支付金额、积分抵扣金额、实际支付金额 。 -->
+	<select id="selectStoreOrderList"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT distinct
+		ttso.storeId
+		FROM t_tsa_store_order ttso
+		WHERE
+		 ttso.deletedFlag=0 and ttso.orderState=6
+	</select>
+
+	<!-- 计算分销金额根据StoreId -->
+	<select id="findDistSumByStoreId" resultType="Double">
+		SELECT
+		SUM(ttso.lastPrice) AS distSum
+		FROM t_tsa_store_order AS ttso WHERE
+		ttso.orderType = 1
+		AND ttso.deletedFlag = 0 and ttso.orderState = 6 AND
+		ttso.storeId =
+		#{storeId}
+	</select>
+	<!-- 根据商家id查询该商家的总订单 -->
+	<select id="selectTotalOrderByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		tso.lastPrice,tto.cardPrice,tto.scorePrice,tto.payPrice,tso.storeId,tto.platformPromotion,
+		tto.platformDeduction,tto.id AS totalOrderId,tto.payType AS
+		payType,tto.payCallbackNo AS payCallbackNo,tsd.goodsId AS skuId,tsd.salePrice
+		AS salePrices,tsd.usedPromotion AS usedplatformPromotion,tsd.deduction AS deduction,
+		tto.payTime AS payTime,tso.orderTime AS orderTime,tsd.name AS itemName,
+		tsd.goodsNum AS goodsNum,tsd.unitPrice AS unitPrice,tmm.userName AS memberName,
+		tso.memberId AS memberId,tso.orderType
+		FROM t_tsa_total_order 
+		tto,t_tsa_store_order
+		tso,t_tsa_store_order_detail tsd,
+	    t_mem_member tmm
+		WHERE tso.totalOrderNo = tto.id and
+		tso.storeId=#{storeId} and tsd.orderId=tso.id and tso.memberId=tmm.id and tso.orderType=2
+	</select>
+	<!-- 根据所用支付级营销活动查询营销活动。 -->
+	<select id="selectPromotionByPlatformPromotion" resultType="com.topaiebiz.promotion.mgmt.entity.PromotionEntity">
+		SELECT id,platformRatio FROM t_pro_promotion WHERE deletedFlag = 0 and
+		id=#{platformPromotion}
+	</select>
+
+	<!-- 根据店铺id查询对应商家 -->
+	<select id="selectMerchantByStore" resultType="com.topaiebiz.merchant.info.entity.StoreInfoEntity">
+		SELECT
+		merchantId,name,id
+		FROM t_mer_store_info
+		WHERE deletedflag = 0 AND id =
+		#{storeId}
+	</select>
+
+	<!-- 根据总订单id查询订单使用美礼卡情况。 -->
+	<select id="selectCardInfoByTotalOrederId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		gg.orderId,gg.cardId AS cardId,gg.id,gi.value AS
+		value,gi.price AS price,gi.platformPrice
+		AS platformPrice,
+		gi.storePrice AS storePrice,gi.cardType AS cardType,
+		gg.price AS
+		cardButtonPrice
+		FROM
+		t_gif_giftcard_use_log gg, t_gif_giftcard_info gi
+		WHERE
+		gg.deletedFlag=0 and gg.cardId=gi.id and gg.orderId=#{orderId}
+		and
+		gi.cardType=2
+	</select>
+
+	<!-- 根据店铺id查询平台订单的id与关联详情表的信息获取具体的SkuId。 -->
+	<select id="selectPlatStoreorderInfoByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		tso.id,tso.orderType AS
+		orderType,tso.storeId,tso.memberId AS memberId,
+		tso.orderState AS
+		orderState,tsod.goodsId AS skuId
+		FROM
+		t_tsa_store_order
+		tso,t_tsa_store_order_detail tsod
+		WHERE
+		tso.storeId=#{storeId} and
+		tso.orderType=1 and tso.id=tsod.orderId and tso.deletedFlag=0
+	</select>
+
+	<!-- 平台端店铺分润结算列表分页加搜索。 -->
+	<select id="getPlatStoreDistributionSettlementList"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		sss.id,si.name storeName,mi.name
+		merchantName,sss.settleStartDate,
+		sss.settleEndDate,sss.cashSum,sss.pointSum,sss.cardSum,sss.saleSum,
+		sss.distSum,sss.promStoreSum,sss.promPlatformSum,sss.cardStoreSubsidy,
+		sss.cardPlatformSubsidy,sss.memberDistPrice,sss.settlePrice,sss.settleType,
+		sss.storeId,sss.paymentChannelCommission,sss.platformCommission,sss.distributorsCommission
+		FROM
+		t_set_store_settlement sss,t_mer_store_info si,t_mer_merchant_info
+		mi
+		WHERE
+		sss.deletedFlag = 0 AND sss.merchantId = mi.id AND sss.storeId
+		= si.id and sss.settleType=2
+		<if test="!(storeName == null || storeName == '')">
+			AND si.name = #{storeName}
+		</if>
+		<if test="!(merchantName == null || merchantName == '')">
+			AND mi.name = #{merchantName}
+		</if>
+	</select>
+
+	<!-- 平台端店铺销售结算详情根据店铺id。 -->
+	<select id="selectPlatStoreSettlementListByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttsod.goodsId,ttso.orderTime AS orderTime
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.storeId = #{storeId} AND ttso.orderType
+		= 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+	</select>
+
+	<!-- 商家端店铺销售结算根据storeId查询分页加搜索。 -->
+	<select id="selectMerchantStoreSettlementListByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttsod.goodsId
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.storeId = #{storeId} AND ttso.orderType
+		= 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+	</select>
+
+	<!-- 商家端分润结算列表分页加搜索。 -->
+	<select id="selectMerchantStoreDistributionSettlementList"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		select
+		mmi.name AS merchantName
+		,msi.name
+		storeName
+		,sss.settleEndDate
+		,sss.settleStartDate
+		,sss.distSum,
+		sss.storeId
+		,sss.state
+		,sss.merchantId,
+		sss.pointSum,sss.cardSum,sss.saleSum,
+		sss.distSum,sss.promStoreSum,sss.promPlatformSum,sss.cardStoreSubsidy,
+		sss.cardPlatformSubsidy,sss.memberDistPrice,sss.settlePrice,sss.settleType,
+		sss.paymentChannelCommission,sss.platformCommission,sss.distributorsCommission
+		from
+		t_set_store_settlement sss,t_mer_merchant_info
+		mmi,t_mer_store_info msi
+		where
+		sss.deletedFlag = 0 AND mmi.id =
+		sss.merchantId AND sss.settleType = 2
+		AND msi.id = sss.storeId AND
+		sss.merchantId = #{merchantId}
+		<if test="!(storeName == null || storeName == '')">
+			AND msi.name = #{storeName}
+		</if>
+	</select>
+
+	<!--平台端店铺分润结算列表分页加搜索根据店铺id。 -->
+	<select id="getPlatStoreDistributionSettlementListByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttsod.goodsId
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.storeId = #{storeId} AND ttso.orderType
+		= 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+
+	</select>
+
+	<!-- 商家端分润结算列表分页加搜索根据店铺id。 -->
+	<select id="selectMerchantStoreDistributionSettlementListByStoreId"
+		resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+		SELECT
+		ttso.id,ttso.createdTime AS createdTime,mm.userName AS
+		memberName,ttsod.goodsId AS skuId,ttsod.name AS itemName,
+		ttsod.goodsNum AS goodsNum,ttsod.unitPrice AS unitPrice,pp.name AS
+		promotionName,
+		ttsod.salePrice AS salePrice,ttso.storeId,ttsod.goodsId AS skuId
+		FROM
+		t_tsa_store_order ttso
+		inner JOIN t_tsa_store_order_detail ttsod
+		on
+		ttso.deletedFlag = 0 AND ttso.storeId = #{storeId} AND ttso.orderType
+		= 1 AND
+		ttso.orderState = 6
+		AND ttsod.orderId = ttso.id
+		<if test="!(itemName == null || itemName == '')">
+			AND ttsod.name = #{itemName}
+		</if>
+		inner JOIN t_mem_member mm
+		on ttso.memberId = mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		left join t_pro_promotion pp ON pp.id =
+		ttsod.usedPromotion
+	</select>
+	<!-- 根据skuId,storeId查询店铺分销金额。 -->
+	<select id="selectGoodsDistributionPrice" resultType="Double">
+		SELECT
+		dgl.distriprice AS storeDistributionPrice
+		FROM
+		t_dis_goods_distribution_log dgl
+		WHERE dgl.storeId=#{storeId} and
+		dgl.skuId=#{skuId}
+	</select>
+
+	<!-- 根据skuId,storeId查询会员分销金额。 -->
+	<select id="selectMemberDistributionPrice" resultType="Double">
+		SELECT
+		sum(dml.distriprice) AS memberDistributionPrice
+		FROM
+		t_dis_member_distribution_log dml
+		WHERE dml.storeId=#{storeId} and
+		dml.skuId=#{skuId}
+	</select>
+
+	<!-- 修改店铺结算状态 -->
+	<update id="updateStoreSettlementState">
+		UPDATE t_set_store_settlement SET state=2 WHERE id =
+		#{id}
+	</update>
+	<!-- -->
+	<select id="selectBrokerageRatioListByStoreId"
+		resultType="Double">
+		SELECT brokerageRatio AS brokerageRatio FROM t_goo_item WHERE id IN
+		(
+		SELECT itemId from t_goo_goods_sku gs where id= #{goodsId}
+		AND gs.deletedFlag = 0 GROUP BY itemId
+		) AND deletedFlag = 0
+	</select>
+	
+	<!-- 根据storeId查询所有订单 -->
+	<select id="selectTotalOrderByStoreIds" resultType="com.topaiebiz.settlement.store.dto.StoreSettlementDto">
+	SELECT
+		tso.lastPrice,tto.cardPrice,tto.scorePrice,tto.payPrice,tso.storeId,tto.platformPromotion,
+		tto.platformDeduction,tto.id AS totalOrderId,tto.payType AS
+		payType,tto.payCallbackNo AS payCallbackNo,tsd.goodsId AS skuId,tsd.salePrice
+		AS salePrices,tsd.usedPromotion AS usedplatformPromotion,tsd.deduction AS deduction,
+		tto.payTime AS payTime,tso.orderTime AS orderTime,tsd.name AS itemName,
+		tsd.goodsNum AS goodsNum,tsd.unitPrice AS unitPrice,tmm.userName AS memberName,
+		tso.memberId AS memberId,tso.orderType AS orderType
+		FROM t_tsa_total_order 
+		tto,t_tsa_store_order
+		tso,t_tsa_store_order_detail tsd,
+	    t_mem_member tmm
+		WHERE tso.totalOrderNo = tto.id and
+		tso.storeId=#{storeId} and tsd.orderId=tso.id and tso.memberId=tmm.id 
+	</select>
+</mapper>

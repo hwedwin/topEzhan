@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.payment.log.dao.PayOrderLogDao">
+  
+    <!-- id表示dao数据访问层的成员方法，parameterType表示传入的参数的类型(此参数可不写)，resultType表示返回的数据 -->
+	<select id="selectPayOrderLogPage" resultType="com.topaiebiz.transaction.payment.log.entity.PayOrderLogEntity">
+		SELECT 
+		pol.id,pol.payOrderId,pol.payType,pol.successState,pol.money,
+		pol.otherAccount,pol.memo 
+		FROM 
+		t_tsa_pay_order_log pol 
+		<where>
+			<if test="payType!=null and payType!=''">
+				pol.payType=#{payType}
+			</if>
+			<if test="payOrderId!=null">
+				pol.payOrderId=#{payOrderId}
+			</if>
+			<if test="successState!=null">
+				pol.successState=#{successState}
+			</if>
+		</where>
+		ORDER BY pol.createdTime DESC 
+	</select>
+ 
+</mapper>

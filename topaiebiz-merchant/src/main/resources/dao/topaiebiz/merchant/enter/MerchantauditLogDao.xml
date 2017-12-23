@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.merchant.enter.dao.MerchantauditLogDao">
+
+	<select id="getMerchantauditLog"
+		resultType="com.topaiebiz.merchant.enter.dto.MerchantauditLogDto">
+		SELECT
+		g.`id`,g.`merchantId`,g.`auditResult`,g.`noPassReason` FROM
+		t_mer_merchant_audit_log g WHERE g.`merchantId` = #{id}
+	</select>
+
+	<select id="getMerchantauditLogs"
+		resultType="com.topaiebiz.merchant.enter.dto.MerchantauditLogDto">
+		SELECT
+		g.`id`,g.`merchantId`,g.`auditResult`,g.`noPassReason` FROM
+		t_mer_merchant_audit_log g WHERE g.`merchantId` = #{id}
+		ORDER BY
+		g.createdTime DESC
+	</select>
+
+	<!-- 商家不通过原因回显(我要查询)的操作。 -->
+	<select id="selectMerchantAuditByMerchantId" resultType="com.topaiebiz.merchant.enter.dto.MerchantAuditDto">
+		SELECT
+		a.`id`,a.`state`,b.`auditResult`,b.`noPassReason`,c.`noPassField`,c.`noPassReason`
+		FROM t_mer_merchant_info a INNER JOIN t_mer_merchant_audit_log b ON
+		a.`id`=b.`merchantId`
+		INNER JOIN t_mer_merchant_audit_detail c ON
+		a.`id`=c.`merchantId`
+		WHERE a.`id`= #{merchantId}
+	</select>
+
+</mapper>

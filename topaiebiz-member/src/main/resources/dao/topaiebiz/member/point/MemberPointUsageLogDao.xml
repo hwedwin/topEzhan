@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.member.point.dao.MemberPointUsageLogDao">
+	<!-- 根据订单号查询订单记录-->
+	<select id="selectByOrderId" resultType="com.topaiebiz.member.point.entity.MemberPointUsageLogEntity" parameterType="Long">
+		SELECT id,memberId,orderId,usageScore,deductibleAmount FROM t_mem_member_point_usage_log WHERE orderId = #{orderId};
+	</select>
+	<!--  删除会员积分使用记录(逻辑删除) -->
+	<update id="deletememberPointUsageLog" parameterType="Long">
+		UPDATE t_mem_member_point_usage_log SET deletedFlag = 1 WHERE id = #{id};
+	</update>
+	<!--  查询会员积分支出记录  -->
+	<select id="getMemberPointSpendingLog" resultType="com.topaiebiz.member.point.entity.MemberPointUsageLogEntity" parameterType="Long">
+		SELECT createdTime,usageScore,orderId FROM t_mem_member_point_usage_log WHERE memberId = #{memberId};
+	</select>
+	
+</mapper>

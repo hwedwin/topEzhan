@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.distribution.member.dao.MemberDistributionLogDao">
+
+	<!-- 会员分销记录列表加分页 -->
+	<select id="selectPageMemberDistributionLog"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT distinct ml.memberId,mm.userName AS
+		memberName,ml.storeId,si.name AS storeName,
+		ml.distriDate AS distriDate
+		FROM t_dis_member_distribution_log ml,t_mem_member mm,t_mer_store_info
+		si
+		WHERE ml.memberId =mm.id AND si.id = ml.storeId
+		AND ml.deletedFlag =
+		0
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		<if test="!(storeName == null || storeName == '')">
+			AND si.name = #{storeName}
+		</if>
+		<if test="!(distriDates == null || distriDates == '')">
+			AND ml.distriDate = STR_TO_DATE(#{distriDates},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+	</select>
+
+	<!-- 根据storeId查询会员分销列表分页加搜索 -->
+	<select id="findMemberDistributionListByStoreId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT gi.name AS itemName,mdl.distriDate,mdl.ratio AS
+		ratio,mdl.goodsNum,mdl.totalPrice,mdl.distriPrice
+		FROM
+		t_dis_member_distribution_log mdl,t_goo_item gi,t_goo_goods_sku gs
+		WHERE mdl.storeId = #{storeId} AND mdl.skuId = gs.id AND gs.itemId =
+		gi.id
+		<!-- 商品名称 -->
+		<if test="!(itemName== null || itemName == '')">
+			AND gi.name = #{itemName}
+		</if>
+		<!-- 分润比例 -->
+		<if test="!(ratio == null || ratio == '')">
+			AND mdl.ratio = #{ratio}
+		</if>
+	</select>
+
+	<!-- 商家端会员分销记录列表分页加搜索 -->
+	<select id="getMerchantMemberDistributionLogList"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT mm.memberCode AS memberCode,mdl.ratio ,mdl.distriDate AS
+		distriDate,mdl.distriLevel,mdl.totalPrice,mdl.distriPrice,mdl.memberId
+		FROM t_dis_member_distribution_log mdl,t_mem_member mm
+		WHERE
+		mdl.storeId =#{storeId} AND mm.id
+		= mdl.memberId
+		<if test="!(memberCode == null || memberCode == '')">
+			AND mm.memberCode = #{memberCode}
+		</if>
+		<if test="!(distriDates == null || distriDates == '')">
+			AND mdl.distriDate = STR_TO_DATE(#{distriDates},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+	</select>
+
+	<!--根据会员编号查询店铺总金额与分销金额 -->
+	<select id="findStoreTotalPriceAndDistriPriceByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT sum(totalPrice) AS totalPriceAmount,sum(distriPrice)
+		AS distriPriceAmount
+		FROM t_dis_member_distribution_log ml
+		WHERE
+		memberId =#{memberId} and deletedFlag = 0
+	</select>
+
+	<!-- 商家端根据memberId查询会员分销商品的记录。 -->
+	<select id="findMemberDistributionListByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		mdl.id,mdl.distriLevel,mdl.memberId,mdl.skuId,mdl.distriDate,mdl.ratio,mdl.goodsNum,mdl.distriPrice,
+		mm.userName AS memberName,gi.name AS
+		itemName,mdl.storeId,mdl.totalPrice
+		FROM t_dis_member_distribution_log
+		mdl,t_mem_member mm,t_goo_goods_sku
+		gs,t_goo_item gi
+		WHERE
+		mdl.deletedFlag = 0 AND mdl.memberId = #{memberId}
+		AND mdl.memberId =
+		mm.id AND mdl.skuId = gs.id AND gs.itemId = gi.id
+		<if test="!(itemName == null || itemName == '')">
+			AND gi.name = #{itemName}
+		</if>
+	</select>
+
+	<!-- 通过MemberId查询对应的分销记录信息 -->
+	<select id="selectMemberDisbutionLogByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT mm.userName AS memberName,mi.id,mi.name AS storeName
+		FROM t_mem_member mm,t_mer_store_info mi
+		WHERE mm.id = #{id} AND
+		mm.storeId=mi.id
+
+	</select>
+
+	<!--根据memberId与分销级别查询该会员的一级分销金额 -->
+	<select id="findMemberDistributionByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		dl.storeId,dl.memberId,dl.skuId,dl.distriLevel,dl.goodsNum,dl.totalPrice,
+		dl.distriPrice,dl.underlingMemberNum,mm.userName AS
+		memberName,dl.distriDate AS distriDate
+		FROM
+		t_dis_member_distribution_log dl,t_mem_member mm
+		WHERE
+		dl.memberId=#{memberId} and dl.distriLevel=1 and mm.id=dl.memberId
+	</select>
+
+	<!--根据memberId与分销级别查询该会员的一级分销金额 -->
+	<select id="findlevelDistributionPriceMemberDistributionByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		dl.storeId,dl.memberId,dl.skuId,dl.distriLevel,dl.goodsNum,dl.totalPrice,
+		dl.distriPrice,dl.underlingMemberNum,dl.distriDate AS distriDate
+		FROM
+		t_dis_member_distribution_log dl
+		WHERE memberId=#{memberId} and
+		distriLevel=2
+	</select>
+	<!-- 根据会员id查询会员子集与下级分销记录列表分页加搜索。 -->
+	<select id="findMembersDistributionListByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		mdl.id,mdl.distriLevel,mdl.memberId,mdl.skuId,mdl.distriDate,mdl.ratio,mdl.goodsNum,mdl.distriPrice,
+		mm.userName AS memberName,gi.name AS itemName
+		FROM
+		t_dis_member_distribution_log mdl,t_mem_member mm,t_goo_goods_sku
+		gs,t_goo_item gi
+		WHERE mdl.deletedFlag = 0 AND mdl.memberId =
+		#{memberId}
+		AND mdl.memberId = mm.id AND mdl.skuId = gs.id AND
+		gs.itemId = gi.id
+		<if test="!(itemName == null || itemName == '')">
+			AND gi.name = #{itemName}
+		</if>
+	</select>
+
+	<!-- 通过StoreID查看会员记录分销金额列表加分页。 -->
+	<select id="findMemberDistributionInfoByStoreId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT ml.memberId,mm.userName AS memberName
+		FROM
+		t_dis_member_distribution_log ml, t_mem_member mm
+		WHERE ml.deletedFlag
+		= 0
+		AND ml.storeId = #{storeId} and ml.memberId=mm.id
+		<if test="!(memberName == null || memberName == '')">
+			AND mm.userName = #{memberName}
+		</if>
+		GROUP BY ml.memberId
+	</select>
+
+	<!-- 根据会员id查询会员所购买的商品信息 -->
+	<select id="findGoodsMemberDistributionListByMemberId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		mdl.id,mdl.distriLevel,mdl.memberId,mdl.skuId,mdl.distriDate,mdl.ratio,mdl.goodsNum,mdl.distriPrice,
+		mm.userName AS MemberName,gi.name AS
+		itemName,mdl.storeId,mdl.totalPrice,mdl.underlingMemberNum
+		FROM
+		t_dis_member_distribution_log mdl,t_mem_member mm,t_goo_goods_sku
+		gs,t_goo_item gi
+		WHERE mdl.deletedFlag = 0 AND mdl.memberId =
+		#{memberId}
+		AND mdl.memberId = mm.id AND mdl.skuId = gs.id AND
+		gs.itemId = gi.id
+		<if test="!(itemName == null || itemName == '')">
+			AND gi.name = #{itemName}
+		</if>
+	</select>
+	<!-- 根据StoreId查询会员分销记录的分销金额。 -->
+	<select id="getMemberDistibutionDisPriceByStoreId"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT ml.memberId,ml.skuId,ml.distriPrice,ml.storeId
+		FROM
+		t_dis_member_distribution_log ml
+		WHERE ml.storeId=#{storeId}
+	</select>
+
+	<!-- 查询会员分销记录所有会员，以及会员的分销金额 -->
+	<select id="selectDistributionDistriPrice"
+		resultType="com.topaiebiz.distribution.member.dto.MemberDistributionLogDto">
+		SELECT
+		memberId,sum(distriPrice)
+		distriPrice
+		FROM
+		t_dis_member_distribution_log
+		WHERE
+		deletedFlag = 0 GROUP BY memberId
+	</select>
+
+	<!-- 根据会员id查询可提现金额。 -->
+	<select id="selectAllowWithdrawalSum" resultType="Double">
+		SELECT
+		sum(distriPrice)
+		FROM
+		t_dis_member_distribution_log
+		WHERE
+		deletedFlag = 0 AND memberId = #{memberId} AND createdTime &lt;
+		DATE_SUB(CURDATE(), INTERVAL 10 DAY)
+		GROUP BY memberId
+	</select>
+	<!-- 根据会员id与skuId查询分销商品的分销金额 --> 
+	<select id="selectMemberDistibutionDisPriceByStoreIdAndSkuId" resultType="Double">
+		SELECT sum(distriPrice)  FROM t_dis_member_distribution_log
+        WHERE deletedFlag = 0 AND memberId = #{memberId}
+        AND skuId = #{goodsId}
+	</select>
+	
+</mapper>

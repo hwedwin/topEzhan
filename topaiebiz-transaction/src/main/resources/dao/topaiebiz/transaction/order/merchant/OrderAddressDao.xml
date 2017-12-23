@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.order.merchant.dao.OrderAddressDao">
+  
+	<select id="getOrderAddressByOrderId" resultType="com.topaiebiz.transaction.order.merchant.entity.OrderAddressEntity">
+        SELECT * FROM t_tsa_order_address WHERE deletedFlag = 0 AND orderId = #{orderId}
+    </select>
+
+
+</mapper>

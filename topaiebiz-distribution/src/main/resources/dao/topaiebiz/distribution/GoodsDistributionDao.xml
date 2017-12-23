@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.distribution.merchant.dao.GoodsDistributionDao">
+
+	<!-- 根据SkuId查询商品分销比例信息 -->
+	<select id="selectBySkuId"
+		resultType="com.topaiebiz.distribution.merchant.entity.GoodsDistributionEntity">
+		SELECT
+		s.skuId,s.storeGradeId,s.ratio,s.startTime,s.endTime,s.memo
+		FROM
+		t_dis_goods_distribution_allocation s
+		WHERE s.skuId=#{skuId}
+	</select>
+
+	<!-- 查询店铺订单数据 订单状态为6 orderState=6表示已完成 ，查询前一天的订单 TO_DAYS(NOW())，不包含退货的金额，退货的状态为退货退款state 
+		= 0 -->
+	<select id="selectStoreOrderList"
+		resultType="com.topaiebiz.transaction.order.merchant.dto.StoreOrderDto">
+		SELECT ts.id,ts.memberId,ts.storeId,ts.orderTime,ts.orderState,td.goodsNum,td.salePrice,td.goodsId
+        FROM t_tsa_store_order ts,t_tsa_store_order_detail td
+        WHERE td.orderId
+		= ts.id AND ts.orderState=6 AND ts.deletedFlag = 0
+		AND ts.id not
+		in(select storeOrderId
+		from t_tsa_refund_order
+		where deletedFlag = 0 AND
+		state = 0)
+		AND TO_DAYS(NOW( ) ) - TO_DAYS(ts.orderTime) &lt;=1  
+	</select>
+
+	<!-- 根据goodsId查询分润比例和店铺等级。 -->
+	<select id="findStoreRatioByGoodsId"
+		resultType="com.topaiebiz.distribution.merchant.entity.GoodsDistributionEntity">
+		SELECT ga.storeGradeId,ga.ratio,ga.skuId
+		FROM
+		t_dis_goods_distribution_allocation ga
+		WHERE ga.skuId=#{goodsId} AND
+		ga.storeGradeId=#{merchantGradeId}
+	</select> 
+
+	<!-- 根据店铺id查询店铺信息 -->
+	<select id="selectStoreInfoByStoreId" resultType="com.topaiebiz.merchant.enter.dto.StoreInfoDto">
+		SELECT
+		mi.merchantId,mi.name,mi.merchantGradeId,mi.id
+		FROM t_mer_store_info mi
+		WHERE mi.id=#{storeId}
+	</select>
+
+	<!-- 根据skuId查询分销记录信息 -->
+	<select id="findGoodsDistributionAllocationBySkuId"
+		resultType="com.topaiebiz.distribution.merchant.dto.GoodsDistributionDto">
+		SELECT id,storeGradeId,ratio
+		FROM
+		t_dis_goods_distribution_allocation
+		WHERE skuId = #{skuId} AND
+		deletedFlag = 0
+	</select>
+
+	<!-- 删除商品分销记录 -->
+	<update id="deleteGoodsDistribution">
+		UPDATE t_dis_goods_distribution_allocation SET
+		deletedFlag=1 WHERE id = #{id}
+	</update>
+</mapper>

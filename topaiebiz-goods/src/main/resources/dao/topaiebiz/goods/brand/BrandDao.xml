@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.brand.dao.BrandDao">
+
+	<!-- 根据id查询商品品牌 -->
+	<select id="selectBrandById" resultType="com.topaiebiz.goods.brand.dto.BrandDto">
+		SELECT id,brandCode,name,englishName,brandImage,brandStory,memo,
+		createdTime,lastModifiedTime FROM t_goo_brand
+		WHERE id=#{id} AND deletedFlag = 0
+	</select>
+
+	<!-- 商品品牌分页检索 -->
+	<select id="selectPageBrand" resultType="com.topaiebiz.goods.brand.dto.BrandDto">
+		SELECT id,brandCode,name,englishName,brandImage,brandStory FROM
+		t_goo_brand WHERE deletedFlag = 0
+		<if test="!(name==null or name=='')">
+			AND name like CONCAT('%', #{name}, '%')  
+		</if>
+		<if test="!(brandCode==null or brandCode=='')">
+			AND brandCode = #{brandCode}
+		</if>
+		ORDER BY createdTime DESC
+	</select>
+
+	<!-- 商品批量逻辑删除 -->
+	<update id="deleteBrands">
+		UPDATE t_goo_brand SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 查看商品品牌列表 -->
+	<select id="selectListBrand" resultType="com.topaiebiz.goods.brand.dto.BrandDto">
+		SELECT id,name,brandImage FROM
+		t_goo_brand WHERE deletedFlag = 0 ORDER BY
+		createdTime DESC
+	</select>
+
+	<!-- 根据品牌名称查询商品品牌信息 -->
+	<select id="selectBrandByName" resultType="com.topaiebiz.goods.brand.entity.BrandEntity">
+		SELECT id,name FROM
+		t_goo_brand WHERE name = #{name}
+		AND deletedFlag = 0
+	</select>
+
+	<!-- 根据品牌名称和id查询商品品牌信息 -->
+	<select id="selectBrandByNameAndId" resultType="com.topaiebiz.goods.brand.dto.BrandDto">
+		SELECT id,brandCode FROM t_goo_brand WHERE name = #{name}
+		AND
+		deletedFlag = 0
+		<if test="!(id == null or id == '')">
+			AND id != #{id}
+		</if>
+	</select>
+
+	<!-- 根据品牌编号查询商品品牌信息 -->
+	<select id="selectBrandByBrandCode" resultType="com.topaiebiz.goods.brand.entity.BrandEntity">
+		SELECT id,brandCode FROM t_goo_brand WHERE brandCode = #{brandCode}
+		AND deletedFlag = 0
+	</select>
+
+	<!-- 根据品牌编号和id查询商品品牌信息 -->
+	<select id="selectBrandByBrandCodeAndId" resultType="com.topaiebiz.goods.brand.dto.BrandDto">
+		SELECT id,brandCode FROM t_goo_brand WHERE brandCode = #{brandCode}
+		AND deletedFlag = 0
+		<if test="!(id == null or id == '')">
+			AND id != #{id}
+		</if>
+	</select>
+
+	<!-- 根据品牌id查询商品品牌信息 -->
+	<select id="selectBrandEntityById" resultType="com.topaiebiz.goods.brand.entity.BrandEntity">
+		SELECT id FROM t_goo_brand WHERE id = #{id} AND deletedFlag = 0
+	</select>
+
+</mapper>

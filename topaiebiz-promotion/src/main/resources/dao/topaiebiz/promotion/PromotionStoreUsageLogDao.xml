@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.promotion.mgmt.dao.PromotionStoreUsageLogDao">
+
+	<select id="selectOneByOrderId" resultType="com.topaiebiz.promotion.mgmt.entity.PromotionStoreUsageLogEntity">
+		SELECT * FROM t_pro_promotion_store_usage_log WHERE
+		deletedFlag = 0 AND orderId = #{orderId}
+	</select>
+
+</mapper>

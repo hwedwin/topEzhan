@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.comment.dao.GoodsSkuCommentDao">
+
+	<!-- 平台端商家商品评价列表 -->
+	<select id="selectListGoodsSkuComment" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT
+		gsk.id,gi.belongStore,
+		gi.name skuName,mm.nickName memberName,gsk.type,
+		gsk.logisticsLevel,gsk.goodsLevel,gs.saleImage pictureName,
+		gsk.serveLevel,gsk.description,gsk.replyText,gsk.createdTime
+		FROM
+		t_goo_item gi
+		JOIN t_goo_goods_sku gs ON gi.id = gs.itemId
+		JOIN
+		t_goo_goods_sku_comment gsk ON gsk.skuId = gs.id
+		LEFT JOIN t_mem_member mm
+		ON gsk.memberId = mm.id
+		WHERE gsk.deletedFlag = 0 AND gi.belongStore IS NULL
+		<if test="!(skuName==null or skuName=='')">
+			AND gi.name like CONCAT('%', #{skuName}, '%')
+		</if>
+		<if test="noReply == 1">
+			AND gsk.replyText IS NULL
+		</if>
+		<if test="noReply == 2">
+			AND gsk.replyText IS NOT NULL
+		</if>
+		ORDER BY gsk.createdTime DESC
+	</select>
+
+	<!-- 商家端商品未回复评价列表 -->
+	<select id="selectNoReplyListGoodsSkuComment" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT gsc.id,gi.belongStore,si.name storeName,
+		gi.name skuName,mm.nickName memberName,gsc.type,
+		gsc.logisticsLevel,gsc.goodsLevel,gs.saleImage pictureName,
+		gsc.serveLevel,gsc.description,gsc.replyText,gsc.createdTime
+		FROM t_goo_item gi
+		JOIN t_goo_goods_sku gs ON gi.id = gs.itemId
+		JOIN t_goo_goods_sku_comment gsc ON gsc.skuId = gs.id
+		JOIN t_mer_store_info si ON gi.belongStore = si.id
+		LEFT JOIN t_mem_member mm ON gsc.memberId = mm.id
+		WHERE gsc.deletedFlag = 0
+		AND gsc.replyText is null AND gi.belongStore = #{belongStore}
+		<if test="!(storeName==null or storeName=='')">
+			AND si.name like CONCAT('%', #{storeName}, '%')
+		</if>
+		<if test="!(skuName==null or skuName=='')">
+			AND gi.name like CONCAT('%', #{skuName}, '%')
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gsc.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gsc.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		ORDER BY gsc.createdTime DESC
+	</select>
+
+	<!-- 商家端商品已回复评价列表 -->
+	<select id="selectReplyListGoodsSkuComment" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT gsc.id,gi.belongStore,si.name storeName,
+		gi.name skuName,mm.nickName memberName,gsc.type,
+		gsc.logisticsLevel,gsc.goodsLevel,gs.saleImage pictureName,
+		gsc.serveLevel,gsc.description,gsc.replyText,gsc.createdTime
+		FROM t_goo_item gi
+		JOIN t_goo_goods_sku gs ON gi.id = gs.itemId
+		JOIN t_goo_goods_sku_comment gsc ON gsc.skuId = gs.id
+		JOIN t_mer_store_info si ON gi.belongStore = si.id
+		LEFT JOIN t_mem_member mm ON gsc.memberId = mm.id
+		WHERE gsc.deletedFlag = 0
+		AND gsc.replyText is not null AND gi.belongStore = #{belongStore}
+		<if test="!(storeName==null or storeName=='')">
+			AND si.name like CONCAT('%', #{storeName}, '%')
+		</if>
+		<if test="!(skuName==null or skuName=='')">
+			AND gi.name like CONCAT('%', #{skuName}, '%')
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gsc.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gsc.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		ORDER BY gsc.createdTime DESC
+	</select>
+
+	<!-- 删除商品评价信息 -->
+	<update id="deleteGoodsSkuComment">
+		UPDATE t_goo_goods_sku_comment SET deletedFlag = 1
+		WHERE id = #{id}
+	</update>
+
+	<!-- 查看商品详细评价 -->
+	<select id="selectGoodsSkuComentById" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT
+		id,goodsLevel,logisticsLevel,serveLevel,replyText,description
+		FROM
+		t_goo_goods_sku_comment
+		WHERE deletedFlag = 0 AND id = #{id}
+	</select>
+
+	<!-- 根据skuId查询商品评价信息 -->
+	<select id="selectGoodsSkuCommentListBySkuId" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT
+		gsc.id,gsc.goodsLevel,gsc.logisticsLevel,gs.saleFieldValue,
+		gsc.serveLevel,gsc.replyText,gsc.createdTime,gsc.type,
+		gsc.description,mm.nickName memberName,mm.smallIcon
+		FROM
+		t_goo_goods_sku_comment gsc
+		JOIN t_goo_goods_sku gs ON gs.id = gsc.skuId
+		LEFT JOIN t_mem_member mm ON
+		gsc.memberId = mm.id
+		WHERE gsc.skuId = #{skuId} AND gsc.deletedFlag = 0
+		ORDER BY gsc.createdTime DESC
+	</select>
+	
+	<!-- 根据订单id查询商品 详情 -->
+	<select id="selectStoreOrderDetailList" resultType="com.topaiebiz.goods.sku.dto.StoreOrderDetailDto">
+		SELECT id,goodsId,name,FieldValue,salePrice,goodsImage
+		FROM t_tsa_store_order_detail 
+		WHERE orderId = #{orderId} AND deletedFlag = 0
+	</select>
+	
+	<!-- 评价完毕修改评价状态 -->
+	<update id="updateOrderBySkuId">
+		UPDATE t_tsa_store_order_detail SET isComment = 1 
+		WHERE deletedFlag = 0 AND goodsId = #{skuId}
+		AND orderId = #{orderId}
+	</update>
+
+	<select id="findByOrderIdAndSkuId" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT * FROM t_goo_goods_sku_comment AS tggsc WHERE tggsc.deletedFlag = 0 AND tggsc.orderId = #{orderId} AND tggsc.skuId = #{skuId}
+	</select>
+
+	<!-- 通过商品id和订单id查询该商品是否评价过 -->
+	<select id="selectGoodsSkuCommentBySkuIdAndOrderId" resultType="com.topaiebiz.goods.comment.dto.GoodsSkuCommentDto">
+		SELECT  id,skuId,orderId FROM t_goo_goods_sku_comment 
+		WHERE deletedFlag = 0 AND skuId = #{skuId}  
+		AND orderId = #{skuId}
+	</select>
+	
+</mapper>

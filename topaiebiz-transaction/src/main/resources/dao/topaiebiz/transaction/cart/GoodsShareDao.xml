@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.transaction.cart.dao.GoodsShareDao">
+  
+	<!-- 根据会员id，sku最小单元商品id，查询当前会员购物车中是否存在此商品 -->
+	<select id="selectGoodsShareByMemberItemId" resultType="com.topaiebiz.transaction.cart.entity.GoodsShareEntity">
+		SELECT 
+		id
+		FROM t_tsa_goods_favorite
+		WHERE memberId = #{memberId} 
+		AND goodsId = #{itemId} AND deletedFlag = 0
+	</select>
+ 
+</mapper>

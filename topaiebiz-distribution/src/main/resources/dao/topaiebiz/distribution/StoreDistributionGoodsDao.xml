@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.distribution.merchant.dao.StoreDistributionGoodsDao">
+
+	<!-- 删除商品分销记录 -->
+	<update id="deleteStoreDistributionGoods">
+		UPDATE t_dis_store_distribution_goods SET
+		deletedFlag=1 WHERE store = #{storeId} AND itemId = #{id}
+	</update>
+	
+	<!-- 根据商家id和商品id查询是否分销此商品 -->
+	<select id="selectStoreDistributionGoods" resultType="com.topaiebiz.distribution.merchant.entity.StoreDistributionGoodsEntity">
+		SELECT id,store,itemId FROM t_dis_store_distribution_goods
+		WHERE store = #{storeId} AND itemId = #{id} AND deletedFlag=0
+	</select>
+</mapper>

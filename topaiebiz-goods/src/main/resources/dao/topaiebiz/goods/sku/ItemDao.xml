@@ -1,0 +1,1011 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.sku.dao.ItemDao">
+
+	<!-- 查询商品信息列表出售中的商品 -->
+	<select id="selectListItemDto" parameterType="com.topaiebiz.goods.sku.dto.ItemDto"
+		resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gi.id,gi.itemCode, gi.belongCategory,
+		bc.name categoryName,
+		gi.name,gi.defaultPrice,gi.brokerageRatio,
+		gi.createdTime,gi.status
+		FROM t_goo_item gi,
+		t_goo_backend_category bc WHERE bc.id = gi.belongCategory
+		AND
+		gi.deletedFlag = 0 AND gi.status = 2
+		<if test="belongStore==null or belongStore == ''">
+			AND gi.belongStore is null
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND gi.belongStore = #{belongStore}
+		</if>
+		<if
+			test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if
+			test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gi.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gi.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		<if test="!(itemCode==null or itemCode=='')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(categoryName==null or categoryName=='')">
+			AND bc.name like CONCAT('%', #{categoryName}, '%')
+		</if>
+		<if test="!(status==null or status=='')">
+			AND gi.status = #{status}
+		</if>
+		GROUP BY gi.id ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 查询商品信息列表仓库中的商品 -->
+	<select id="selectListStoreItemDto" parameterType="com.topaiebiz.goods.sku.dto.ItemDto"
+		resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gi.id,gi.itemCode, gi.name,bc.name categoryName ,
+		gi.defaultPrice,gi.brokerageRatio,
+		gi.createdTime,gi.status
+		FROM t_goo_item gi ,
+		t_goo_backend_category bc
+		WHERE bc.id = gi.belongCategory
+		AND
+		gi.deletedFlag = 0 AND gi.status != 2
+		<if test="belongStore==null or belongStore == ''">
+			AND gi.belongStore is null
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND gi.belongStore = #{belongStore}
+		</if>
+		<if
+			test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if
+			test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gi.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gi.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		<if test="!(itemCode==null or itemCode=='')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(categoryName==null or categoryName=='')">
+			AND bc.name like CONCAT('%', #{categoryName}, '%')
+		</if>
+		<if test="!(status==null or status=='')">
+			AND gi.status = #{status}
+		</if>
+		GROUP BY gi.id ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 查询商家商品信息列表 -->
+	<select id="selectListMerchantItemDto" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gi.id,gi.itemCode, gi.name,bc.name
+		categoryName,gi.defaultPrice,
+		gi.createdTime,gi.status,gi.belongStore,
+		si.name storeName
+		FROM t_goo_item gi ,
+		t_goo_backend_category
+		bc,t_mer_store_info si
+		WHERE bc.id = gi.belongCategory AND
+		gi.belongStore = si.id
+		AND
+		gi.deletedFlag = 0 AND
+		gi.belongStore is not
+		null
+		<if
+			test="!(priceRangeLeft==0 or priceRangeLeft=='' or priceRangeLeft==null)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if
+			test="!(priceRangeRigth==0 or priceRangeRigth=='' or priceRangeRigth==null)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gi.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gi.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		<if test="!(itemCode==null or itemCode=='')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(storeName==null or storeName=='')">
+			AND si.name like CONCAT('%', #{storeName}, '%')
+		</if>
+		<if test="!(categoryName==null or categoryName=='')">
+			AND bc.name like CONCAT('%', #{categoryName}, '%')
+		</if>
+		<if test="!(status==null or status=='')">
+			AND gi.status = #{status}
+		</if>
+		GROUP BY gi.id ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 营销活动查询商家商品和平台商品信息列表分页检索 -->
+	<select id="selectListMarketItemDto" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gi.id,gi.itemCode,gi.name,bc.name
+		categoryName,gi.defaultPrice,gip.name pictureName,
+		gi.createdTime,gi.status,gi.belongStore
+		FROM t_goo_item gi INNER JOIN
+		t_goo_backend_category bc
+		ON bc.id = gi.belongCategory
+		AND gi.deletedFlag = 0 AND gi.status = 2
+		LEFT JOIN t_goo_item_picture gip
+		ON gip.itemId = gi.id
+		AND gip.isMain = 1 AND gip.deletedFlag = 0
+		WHERE 1 = 1
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		<if test="!(itemCode==null or itemCode=='')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND gi.belongStore = #{belongStore}
+		</if>
+		<if test="belongStore==null or belongStore == ''">
+			AND gi.belongStore is null
+		</if>
+		ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 逻辑删除商品item信息 -->
+	<update id="deleteItem">
+		UPDATE t_goo_item SET deletedFlag = 1 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 对商品批量上架 -->
+	<update id="updatePutItem">
+		UPDATE t_goo_item SET status = 2 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 对商品冻结 -->
+	<update id="freezeItem">
+		UPDATE t_goo_item SET status = 0 WHERE id = #{id}
+	</update>
+
+	<!-- 对商品批量下架 -->
+	<update id="updateOutItem">
+		UPDATE t_goo_item SET status = 3 WHERE id IN
+		<foreach collection="array" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 根据商品item编号查询商品信息 -->
+	<select id="selectItemByItemCode" resultType="com.topaiebiz.goods.sku.entity.ItemEntity">
+		SELECT id,itemCode,brokerageRatio FROM t_goo_item WHERE itemCode = #{itemCode} AND
+		deletedFlag = 0
+		<if test="belongStore==null or belongStore == ''">
+			AND belongStore is null
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND belongStore = #{belongStore}
+		</if>
+	</select>
+
+	<!-- 根据商品item编号和id查询商品信息 -->
+	<select id="selectItemByItemCodeAndId" resultType="com.topaiebiz.goods.sku.entity.ItemEntity">
+		SELECT id,itemCode FROM t_goo_item WHERE itemCode = #{itemCode}
+		AND id
+		!= #{id} AND deletedFlag = 0
+		<if test="belongStore==null or belongStore == ''">
+			AND belongStore is null
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND belongStore = #{belongStore}
+		</if>
+	</select>
+
+	<!-- 根据id查询商品信息 -->
+	<select id="selectItemById" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		gi.id,gi.itemCode,gi.belongCategory,
+		gi.belongBrand,gi.belongStore,gi.status,
+		gi.name,gi.defaultPrice,gi.ageId,gi.brokerageRatio,
+		gi.description,gi.imageField,gi.logisticsId,gi.weightBulk
+		FROM
+		t_goo_item gi WHERE gi.id =#{id} AND gi.deletedFlag = 0
+	</select>
+
+	<!-- 商家根据id查询商品信息 -->
+	<select id="selectMerchantItemById" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		gi.id,gi.itemCode,gi.belongCategory,gi.belongBrand,gi.belongStore,
+		gbc.name categoryName,gsa.ageGroup ageGroup,si.name storeName,
+		gi.name,gi.defaultPrice,gi.ageId,gi.description,gi.imageField,
+		gi.logisticsId,gi.weightBulk
+		FROM t_goo_item gi,t_goo_backend_category
+		gbc,t_goo_suitable_age gsa,
+		t_mer_store_info si
+		WHERE gi.id =#{id} AND
+		gbc.id = gi.belongCategory AND
+		gsa.id = gi.ageId AND si.id =
+		gi.belongStore
+		AND gi.deletedFlag = 0
+	</select>
+
+	<!-- 根据id查询商品信息 -->
+	<select id="selectItemByItemId" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		id,name,belongStore FROM t_goo_item WHERE id = #{id}
+	</select>
+
+	<!-- 根据skuId查询商品名称 -->
+	<select id="selectItemNameBySkuId" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		gi.id,gi.name FROM t_goo_item gi,t_goo_goods_sku gs
+		WHERE gi.id =
+		gs.itemId AND gs.deletedFlag = 0 AND gs.id = #{skuId}
+	</select>
+
+	<select id="selectAppItemByItemId" resultType="com.topaiebiz.goods.sku.entity.ItemEntity">
+		SELECT
+		id,name,id,itemCode,`name`,spuId,defaultPrice,belongStore,
+		belongBrand,ageId,belongCategory,imageField,`status`,
+		logisticsId,weightBulk,description,memo,creatorId,createdTime,
+		lastModifierId,lastModifiedTime,deletedFlag,version FROM t_goo_item
+		WHERE deletedFlag = 0 AND id = #{id}
+	</select>
+
+	<!-- 根据类目id查询是否有item商品 -->
+	<select id="selectItemByBelongCategory" resultType="com.topaiebiz.goods.sku.entity.ItemEntity">
+		SELECT
+		id,name,belongCategory,version FROM t_goo_item
+		WHERE belongCategory =
+		#{belongCategory} AND
+		deletedFlag = 0
+	</select>
+
+	<!-- 根据商品id查询商品销售数量 -->
+	<select id="selectSalesVolomeById" resultType="Long">
+		SELECT
+		sum(sod.goodsNum) FROM t_goo_goods_sku gs ,t_tsa_store_order_detail
+		sod WHERE gs.itemId = #{itemId} AND gs.id = sod.goodsId AND
+		gs.deletedFlag = 0 AND sod.deletedFlag = 0
+	</select>
+
+	<!-- 根据商品id查询商品库存 -->
+	<select id="selecStockNumbertById" resultType="Long">
+		SELECT
+		SUM(gs.stockNumber) FROM t_goo_item gi,t_goo_goods_sku gs
+		WHERE gi.id =
+		gs.itemId AND gi.id = #{itemId}
+		AND gi.deletedFlag = 0 AND
+		gs.deletedFlag = 0
+	</select>
+
+	<!-- app端根据年龄段和商家查询商品 -->
+	<select id="selectItemListByItem" resultType="com.topaiebiz.goods.sku.dto.ItemDto"
+		parameterType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT id,name,defaultPrice,ageId,belongBrand,createdTime,
+		belongCategory,belongStore FROM
+		((SELECT gi.id, gi.name
+		,gi.defaultPrice,gi.createdTime,
+		gi.ageId,gi.status,
+		gi.belongBrand,gi.belongCategory,gi.belongStore
+		FROM t_goo_item gi
+		WHERE gi.deletedFlag = 0
+		AND gi.status = 2 AND gi.deletedFlag = 0
+		<if test="belongStore==null or belongStore == ''">
+			AND gi.belongStore = 1
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND gi.belongStore = #{belongStore}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND gi.belongBrand = #{belongBrand}
+		</if>
+		<if test="!(belongCategory==null or belongCategory == '')">
+			AND gi.belongCategory = #{belongCategory}
+		</if>
+		<if test="!(ageId==null or ageId == '')">
+			AND gi.ageId = #{ageId}
+		</if>
+		<if
+			test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if
+			test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(belongCategoryIds==null)">
+			AND gi.belongCategory in
+			<foreach collection="belongCategoryIds" item="categoryId"
+				open="(" separator="," close=")">
+				#{categoryId}
+			</foreach>
+		</if>
+		<if test="!(name==null or name == '')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		)
+		UNION
+		(SELECT gi.id, gi.name ,gi.defaultPrice,gi.createdTime,
+		gi.ageId,gi.status,
+		gi.belongBrand,gi.belongCategory,gi.belongStore
+		FROM t_dis_store_distribution_goods sdg,
+		t_goo_item gi
+		WHERE sdg.itemId
+		= gi.id AND gi.status = 2 AND sdg.deletedFlag = 0
+		<if test="belongStore==null or belongStore == ''">
+			AND sdg.store = 1
+		</if>
+		<if test="!(belongStore==null or belongStore == '')">
+			AND sdg.store = #{belongStore}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND gi.belongBrand = #{belongBrand}
+		</if>
+		<if test="!(ageId==null or ageId == '')">
+			AND gi.ageId = #{ageId}
+		</if>
+		<if
+			test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if
+			test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(belongCategoryIds==null)">
+			AND gi.belongCategory in
+			<foreach collection="belongCategoryIds" item="categoryId"
+				open="(" separator="," close=")">
+				#{categoryId}
+			</foreach>
+		</if>
+		<if test="!(name==null or name == '')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		)) a
+		ORDER BY
+		<if test="price == 0">
+			a.defaultPrice DESC,
+		</if>
+		<if test="price == 1">
+			a.defaultPrice,
+		</if>
+		a.createdTime DESC
+	</select>
+
+	<!-- 根据id查询商品图片 -->
+	<select id="selectPictureNameById" resultType="com.topaiebiz.goods.sku.entity.ItemPictureEntity">
+		SELECT id,name
+		FROM t_goo_item_picture WHERE itemId = #{id} AND deletedFlag = 0
+	</select>
+
+	<!-- 根据会员id查询购物车信息 -->
+	<select id="selectShoppingCartByMemberId" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		gi.belongStore,gs.saleImage pictureName,gi.id,
+		gi.name,
+		gi.status,sc.goodsNum buyNumber,gs.id skuId,
+		gs.price
+		skuPrice,gs.baseFieldValue baseFieldValue,
+		gs.saleFieldValue
+		saleFieldValue,gs.articleNumber,
+		gs.barCode,gs.stockNumber,sc.id cattId
+		FROM t_goo_goods_sku gs,t_goo_item gi,t_tsa_shopping_cart sc
+		WHERE
+		gs.deletedFlag = 0 AND gs.itemId = gi.id AND sc.deletedFlag = 0
+		AND
+		gs.id = sc.goodsId AND sc.memberId = #{memberId}
+		ORDER BY gi.status =2
+		DESC
+	</select>
+
+	<!-- 根据会员id查询收藏夹信息 -->
+	<select id="selectGoodsFavoriteListByMemberId" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gf.id favId,gi.id,gi.name,gip.name pictureName,gi.defaultPrice
+		FROM t_tsa_goods_favorite gf,t_goo_item gi,
+		t_goo_item_picture gip
+		WHERE gf.deletedFlag = 0 AND gf.memberId = #{memberId}
+		AND gi.id =
+		gf.goodsId AND gip.itemId = gi.id AND gip.isMain = 1
+		AND
+		gip.deletedFlag = 0
+		ORDER BY gf.createdTime DESC
+	</select>
+
+	<!-- 根据会员id查询足迹信息 -->
+	<select id="selectGoodsFootprintListByMemberId" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gf.id favId,gi.id,gi.name,gip.name pictureName,gi.defaultPrice
+		FROM t_tsa_goods_footprint gf,t_goo_item gi,
+		t_goo_item_picture gip
+		WHERE gf.deletedFlag = 0 AND gf.memberId = #{memberId}
+		AND gi.id =
+		gf.goodsId AND gip.itemId = gi.id AND gip.isMain = 1
+		AND
+		gip.deletedFlag = 0
+		<if test="!(createdTimes==null or createdTimes=='')">
+			AND gf.createdTime =
+			STR_TO_DATE(#{createdTimes},'%Y-%m-%d')
+		</if>
+		ORDER BY gf.createdTime DESC
+	</select>
+
+	<!-- app端根据id查询商品信息 -->
+	<select id="selectAppItemById" resultType="com.topaiebiz.goods.sku.dto.ItemAppDto">
+		SELECT
+		gi.id,gi.name,gi.defaultPrice,gi.belongCategory,
+		gi.belongStore,si.name storeName,
+		gi.status,
+		gi.belongBrand,gb.name brandName,
+		gi.imageField,gi.logisticsId,gi.description
+		FROM t_goo_item gi join
+		t_goo_brand gb ON gi.deletedFlag = 0
+		AND gb.id= gi.belongBrand AND
+		gi.id = #{id}
+		LEFT join t_mer_store_info si
+		ON si.id = gi.belongStore
+	</select>
+
+	<!-- 商家端分销商品管理平台商品 -->
+	<select id="selectDistributionMerchantListItemDto" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT gi.id,gi.name,gi.defaultPrice,gi.createdTime,
+		gi.brokerageRatio FROM
+		t_dis_store_distribution_goods sdg,t_goo_item gi
+		WHERE sdg.store = #{belongStore}
+		AND sdg.itemId = gi.id AND sdg.deletedFlag = 0 AND
+		gi.status = 2
+		<if test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND gi.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND gi.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gi.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gi.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 根据店铺id查询店铺名称 -->
+	<select id="selectStoreNameById" resultType="String">
+		SELECT name FROM
+		t_mer_store_info where id=#{id} AND deletedFlag = 0
+	</select>
+
+	<!-- 平台端统计管理商品销售情况 -->
+	<select id="selectSellGoodsList" resultType="com.topaiebiz.goods.sku.dto.ItemSellDto">
+		SELECT gi.id,gi.name FROM t_goo_item gi
+		JOIN t_goo_goods_sku gd ON
+		gi.id = gd.itemId WHERE gd.id IN(
+		SELECT ttsod.goodsId id FROM
+		t_tsa_store_order_detail AS ttsod
+		WHERE ttsod.orderId IN(
+		SELECT ttso.id
+		FROM t_tsa_store_order AS ttso
+		WHERE ttso.orderType = 1 AND
+		ttso.deletedFlag = 0
+		AND ttso.orderState = 2
+		)AND ttsod.deletedFlag = 0
+		<if test="days == 1">
+			AND to_days(ttsod.createdTime) = to_days(now())
+		</if>
+		<if test="days == 7">
+			AND date_sub(curdate(),INTERVAL 7 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 30">
+			AND date_sub(curdate(),INTERVAL 30 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 90">
+			AND date_sub(curdate(),INTERVAL 90 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="!(createdTimes==null or createdTimes=='')">
+			AND ttsod.createdTime =
+			STR_TO_DATE(#{createdTimes},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		GROUP BY ttsod.goodsId
+		) AND gi.deletedFlag = 0
+		GROUP BY gi.id
+		ORDER BY
+		gi.createdTime DESC
+	</select>
+
+	<!-- 商家端统计管理商品销售情况 -->
+	<select id="selectMerchantSellGoodsList" resultType="com.topaiebiz.goods.sku.dto.ItemSellDto">
+		SELECT gi.id,gi.name FROM t_goo_item gi JOIN t_goo_goods_sku gd ON
+		gi.id = gd.itemId WHERE gd.id
+		IN(
+		SELECT ttsod.goodsId id
+		FROM
+		t_tsa_store_order_detail AS ttsod WHERE ttsod.orderId in
+		(
+		SELECT
+		ttso.id FROM t_tsa_store_order AS ttso
+		WHERE ttso.orderType =2
+		AND
+		ttso.deletedFlag = 0 and ttso.orderState = 2
+		AND ttso.storeId =
+		#{storeId}
+		)
+		AND ttsod.deletedFlag = 0
+		<if test="days == 1">
+			AND to_days(ttsod.createdTime) = to_days(now())
+		</if>
+		<if test="days == 7">
+			AND date_sub(curdate(),INTERVAL 7 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 30">
+			AND date_sub(curdate(),INTERVAL 30 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 90">
+			AND date_sub(curdate(),INTERVAL 90 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="!(createdTimes==null or createdTimes=='')">
+			AND ttsod.createdTime =
+			STR_TO_DATE(#{createdTimes},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		GROUP BY ttsod.goodsId ) AND gi.deletedFlag = 0
+		GROUP BY gi.id ORDER BY
+		gi.createdTime DESC
+	</select>
+
+	<!-- 根据商品goodsId查询销售数量 -->
+	<select id="selectSaleNumber" resultType="com.topaiebiz.goods.sku.dto.ItemSellDto">
+		SELECT
+		goodsId,sum(goodsNum) saleNumber,sum(salePrice) salesAmount FROM
+		t_tsa_store_order_detail
+		WHERE
+		goodsId = #{goodsId} AND deletedFlag = 0
+		GROUP BY goodsId
+	</select>
+
+	<!-- 根据商品goodsId查询购买人数 -->
+	<select id="selectPaymentPeoples" resultType="Integer">
+		SELECT
+		count(so.memberId),sod.goodsId FROM t_tsa_store_order so,
+		t_tsa_store_order_detail sod
+		WHERE so.id = sod.orderId AND sod.goodsId
+		= #{goodsId}
+	</select>
+
+	<!-- 装修时查询商家商品和分销平台的商品 -->
+	<select id="selectItemAndDisList" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		id,itemCode,name,defaultPrice,pictureName,ageId,belongBrand,createdTime,
+		belongCategory,belongStore,status FROM
+		((SELECT
+		gi.id,gi.itemCode,gi.name ,gi.defaultPrice,gi.createdTime,
+		gip.name
+		pictureName,gi.ageId,gi.status,
+		gi.belongBrand,gi.belongCategory,gi.belongStore
+		FROM t_goo_item gi
+		,t_goo_item_picture gip
+		WHERE gi.deletedFlag = 0 AND gi.status = 2
+		AND
+		gip.itemId = gi.id
+		AND gip.isMain = 1 AND gi.deletedFlag = 0
+		AND
+		gi.belongStore = #{belongStore}
+		<if test="!(itemCode==null or itemCode == '')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(belongCategory==null or belongCategory == '')">
+			AND gi.belongCategory = #{belongCategory}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND gi.belongBrand = #{belongBrand}
+		</if>
+		)
+		UNION
+		(SELECT gi.id,gi.itemCode,gi.name
+		,gi.defaultPrice,gi.createdTime,
+		gip.name
+		pictureName,gi.ageId,gi.status,
+		gi.belongBrand,gi.belongCategory,gi.belongStore
+		FROM
+		t_dis_store_distribution_goods sdg,
+		t_goo_item gi,t_goo_item_picture
+		gip
+		WHERE sdg.itemId = gi.id AND gi.status = 2
+		AND gip.itemId = gi.id
+		AND gip.isMain = 1
+		AND sdg.store = #{belongStore}
+		AND sdg.deletedFlag =
+		0
+		<if test="!(itemCode==null or itemCode == '')">
+			AND gi.itemCode = #{itemCode}
+		</if>
+		<if test="!(belongCategory==null or belongCategory == '')">
+			AND gi.belongCategory = #{belongCategory}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND gi.belongBrand = #{belongBrand}
+		</if>
+		)) a
+		ORDER BY a.createdTime DESC
+	</select>
+
+	<!-- 商家端商品信息中的平台池商品管理列表 -->
+	<select id="selectStoreDistributionGoods" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT
+		gi.id,gi.itemCode,gi.name,gi.defaultPrice,gi.createdTime,
+		gi.status,dsdg.deletedFlag,dsdg.store belongStore,
+		dsdg.itemId,gi.belongStore,gi.brokerageRatio
+		FROM
+		t_goo_item gi
+		LEFT JOIN
+		t_dis_store_distribution_goods dsdg
+		ON gi.id = dsdg.itemId AND
+		dsdg.deletedFlag = 0
+		AND dsdg.store = #{belongStore}
+		WHERE
+		gi.deletedFlag = 0 AND gi.status = 2
+		AND gi.belongStore is null
+		AND gi.belongCategory IN (SELECT categoryId 
+		FROM t_goo_backend_merchant_category 
+		WHERE merchantId = #{merchantId} AND deletedFlag = 0 )
+		<if test="!(beganTime==null or beganTime=='')">
+			AND gi.createdTime >=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime==null or endTime=='')">
+			AND gi.createdTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(name==null or name=='')">
+			AND gi.name like CONCAT('%', #{name}, '%')
+		</if>
+		ORDER BY gi.createdTime DESC
+	</select>
+
+	<!-- 平台端统计管理商品类目销售分析 -->
+	<select id="selectSellGoodsCategoryList" resultType="com.topaiebiz.goods.sku.dto.ItemSellDto">
+		SELECT count(belongCategory) count,belongCategory categoryIdt
+		FROM
+		t_goo_item WHERE id IN(
+		SELECT gi.id FROM t_goo_item gi
+		JOIN
+		t_goo_goods_sku gd ON gi.id = gd.itemId
+		WHERE
+		gd.id IN(
+		SELECT
+		ttsod.goodsId id FROM t_tsa_store_order_detail AS ttsod
+		WHERE
+		ttsod.orderId IN(
+		SELECT ttso.id FROM t_tsa_store_order AS ttso
+		WHERE
+		ttso.orderType = 1 AND ttso.deletedFlag = 0
+		AND ttso.orderState = 2
+		)AND ttsod.deletedFlag = 0
+		<if test="days == 1">
+			AND to_days(ttsod.createdTime) = to_days(now())
+		</if>
+		<if test="days == 7">
+			AND date_sub(curdate(),INTERVAL 7 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 30">
+			AND date_sub(curdate(),INTERVAL 30 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="!(createdTimes==null or createdTimes=='')">
+			AND ttsod.createdTime =
+			STR_TO_DATE(#{createdTimes},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		GROUP BY ttsod.goodsId
+		)GROUP BY gi.id ORDER BY gi.createdTime DESC
+		)AND deletedFlag = 0 GROUP BY belongCategory
+	</select>
+
+	<!-- 商家端统计管理商品类目销售分析 -->
+	<select id="selectStoreSellGoodsCategoryList" resultType="com.topaiebiz.goods.sku.dto.ItemSellDto">
+		SELECT count(belongCategory) count,belongCategory categoryIdt
+		FROM
+		t_goo_item WHERE id IN(
+		SELECT gi.id FROM t_goo_item gi
+		JOIN
+		t_goo_goods_sku gd ON gi.id = gd.itemId
+		WHERE
+		gd.id IN(
+		SELECT
+		ttsod.goodsId id FROM t_tsa_store_order_detail AS ttsod
+		WHERE
+		ttsod.orderId IN(
+		SELECT ttso.id FROM t_tsa_store_order AS ttso
+		WHERE
+		ttso.orderType = 2 AND ttso.deletedFlag = 0
+		AND ttso.orderState = 2 AND
+		ttso.storeId = #{storeId}
+		)AND ttsod.deletedFlag = 0
+		<if test="days == 1">
+			AND to_days(ttsod.createdTime) = to_days(now())
+		</if>
+		<if test="days == 7">
+			AND date_sub(curdate(),INTERVAL 7 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="days == 30">
+			AND date_sub(curdate(),INTERVAL 30 DAY) &lt;=
+			date(ttsod.createdTime)
+		</if>
+		<if test="!(createdTimes==null or createdTimes=='')">
+			AND ttsod.createdTime =
+			STR_TO_DATE(#{createdTimes},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		GROUP BY ttsod.goodsId
+		)GROUP BY gi.id ORDER BY gi.createdTime DESC
+		)AND deletedFlag = 0 GROUP BY belongCategory
+	</select>
+
+	<!-- 根据商品ID主键集合 查询商品 -->
+	<select id="selectItemsByIds" resultType="com.topaiebiz.goods.sku.dto.ItemDto">
+		SELECT id, itemCode, name, spuId, defaultPrice, belongStore,
+		belongBrand, ageId, imageField, belongCategory, status,
+		logisticsId,
+		description, memo, creatorId, createdTime, lastModifierId,
+		lastModifiedTime, deletedFlag, version
+		from t_goo_item WHERE id in
+		<foreach item="itemId" index="index" collection="ids" open="("
+			separator="," close=")">
+			#{itemId}
+		</foreach>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND belongBrand = #{belongBrand}
+		</if>
+		<if test="!(ageId==null or ageId == '')">
+			AND ageId = #{ageId}
+		</if>
+		<if	test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if	test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		ORDER BY
+		<if test="price == 0">
+			defaultPrice DESC,
+		</if>
+		<if test="price == 1">
+			defaultPrice,
+		</if>
+		createdTime DESC
+	</select>
+
+	<!-- 根据运费模板id查询运费模板详情 -->
+	<select id="selectOneByFreightId"
+		resultType="com.topaiebiz.goods.sku.entity.FreightTempleteDetailSkuEntity">
+		SELECT
+		id,type,firstNum,firstPrice,districtIdList,addPrice,addNum,isDefault
+		FROM
+		t_mer_freight_templete_detail
+		WHERE
+		freightId = #{logisticsId} AND
+		deletedFlag = 0 
+	</select>
+
+	<!-- 通过营销id和skuId查询商品销售数量 -->
+	<select id="selectKillSales" resultType="Long">
+		SELECT
+		sum(goodsNum)
+		FROM
+		t_tsa_store_order_detail
+		WHERE
+		deletedFlag = 0 AND goodsId = #{skuId} AND usedPromotion = #{promotionId}
+	</select>
+
+	<!-- 根据商品id和会员id查询收藏商品 -->
+	<select id="selectFavoriteByMemberAndGoodsId" resultType="Long">
+		SELECT
+		id FROM t_tsa_goods_favorite
+		WHERE deletedFlag = 0 AND memberId = #{memberId} AND goodsId = #{id}
+	</select>
+
+
+	<!-- 根据商品id和店铺id查询商品的单品活动 -->
+	<select id="selectPromoTionBySkuId" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT
+		ppg.id,ppg.promotionId,ppg.promotionNum,ppg.promotionPrice,
+		ppg.confineNum,ppg.itemId,ppg.goodsSkuId,pp.typeId,
+		ppg.discountType,ppg.goodsSkuId,pp.memberGradeId,pp.memberTypeId,
+		ppg.discountValue,ppg.giveawayGoods,ppg.platformPrice,
+		pp.startTime,pp.endTime
+		FROM
+		t_pro_promotion_goods ppg
+		JOIN
+		t_pro_promotion pp ON pp.id = ppg.promotionId
+		WHERE pp.deletedFlag = 0
+		AND ppg.deletedFlag = 0
+		AND pp.marketState = 2 AND pp.typeId in(1,2)
+		AND ppg.goodsSkuId = #{skuId}
+		AND pp.sponsorType =#{storeId};
+	</select>
+
+	<!-- 根据商品id查询营销活动 -->
+	<select id="selectPromotionByItemId" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT typeId
+		FROM
+		(SELECT p.typeId FROM t_pro_promotion p
+		JOIN t_pro_promotion_goods ppg ON
+		p.id = ppg.promotionId WHERE
+		p.deletedFlag = 0 AND ppg.deletedFlag = 0
+		AND p.marketState = 2 AND
+		ppg.itemId = #{id}
+		UNION ALL
+		SELECT p.typeId FROM t_pro_promotion p WHERE p.deletedFlag = 0
+		AND p.marketState = 2 AND p.isGoodsArea = 1) a GROUP BY typeId
+	</select>
+
+	<!-- 根据skuId查询商品是否为秒杀 -->
+	<select id="selectPromotionDtoBySkuId" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT p.id	promotionId,p.endTime,g.promotionPrice,g.promotionNum
+		FROM t_pro_promotion p LEFT JOIN t_pro_promotion_goods g
+		ON p.id = g.promotionId WHERE p.deletedFlag = 0 AND g.deletedFlag = 0
+		AND p.marketState = 2 AND p.sponsorType IS NULL AND p.typeId = 6
+		AND g.goodsSkuId = #{skuId}
+	</select>
+
+	<!-- 根据该商品查询对应的包邮活动 -->
+	<select id="selectStorePinkagePromoTionGoodsDtos" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT p.id promotionId,p.name,p.condValue FROM t_pro_promotion p LEFT JOIN
+		t_pro_promotion_goods g
+		ON p.id = g.promotionId WHERE p.deletedFlag = 0 AND g.deletedFlag = 0
+		AND marketState = 2 AND p.typeId = 8 AND g.goodsSkuId = #{skuId}
+		UNION
+		SELECT p.id promotionId,p.name,p.condValue FROM t_pro_promotion p
+		WHERE
+		p.deletedFlag = 0 AND p.marketState = 2
+		AND p.typeId = 8 AND p.isGoodsArea = 1
+	</select>
+
+	<!-- 店铺优惠券 -->
+	<select id="selectStoreCouponPromoTionGoodsDtos" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,
+		p.confineAmount,p.amount,p.usedAmount,	
+		p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p LEFT JOIN t_pro_promotion_goods g ON p.id =
+		g.promotionId
+		WHERE p.deletedFlag = 0 AND g.deletedFlag = 0 AND
+		p.marketState = 2
+		AND p.gradeId = 2 AND p.typeId = 7 AND p.sponsorType
+		= #{storeId}
+		AND g.goodsSkuId = #{skuId}
+		UNION
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,
+		p.confineAmount,p.amount,p.usedAmount,	
+		p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p WHERE p.deletedFlag = 0 AND p.marketState = 2
+		AND p.typeId = 7 AND p.isGoodsArea = 1
+	</select>
+
+	<!-- 平台优惠券 -->
+	<select id="selectAdminCouponPromoTionGoodsDtos" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,
+		p.confineAmount,p.amount,p.usedAmount,	
+		p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p LEFT JOIN t_pro_promotion_goods g ON p.id =
+		g.promotionId
+		WHERE p.deletedFlag = 0 AND g.deletedFlag = 0 AND
+		p.marketState = 2
+		AND p.gradeId = 3 AND p.typeId = 4 AND p.sponsorType
+		IS NULL
+		AND g.goodsSkuId = #{skuId}
+		UNION
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,
+		p.confineAmount,p.amount,p.usedAmount,	
+		p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p WHERE p.deletedFlag = 0 AND p.marketState = 2
+		AND p.typeId = 4 AND p.isGoodsArea = 1
+	</select>
+
+	<!-- 店铺级活动（满减） -->
+	<select id="selectStoreMoneyOffPromoTionGoodsDtos" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p LEFT JOIN t_pro_promotion_goods g ON p.id =
+		g.promotionId
+		WHERE p.deletedFlag = 0 AND g.deletedFlag = 0 AND
+		p.marketState = 2
+		AND p.gradeId = 2 AND p.typeId = 3 AND p.sponsorType
+		= #{storeId}
+		AND g.goodsSkuId = #{skuId}
+		UNION
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p WHERE p.deletedFlag = 0 AND p.marketState = 2
+		AND p.gradeId = 2 AND p.typeId = 3 AND p.isGoodsArea = 1
+	</select>
+
+	<!-- 平台级活动（平台级活动（除平台优惠券和平台级单品活动）） -->
+	<select id="selectAdminMoneyOffPromoTionGoodsDtos" resultType="com.topaiebiz.goods.sku.dto.PromoTionGoodsDto">
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p LEFT JOIN t_pro_promotion_goods g ON p.id =
+		g.promotionId
+		WHERE p.deletedFlag = 0 AND g.deletedFlag = 0 AND
+		p.marketState = 2
+		AND p.gradeId = 3 AND p.typeId != 4 AND p.sponsorType
+		IS NULL
+		AND g.goodsSkuId = #{skuId}
+		UNION
+		SELECT
+		p.id promotionId,p.name,p.condType,p.condValue,p.discountType,p.discountValue,p.startTime,p.endTime
+		FROM t_pro_promotion p WHERE p.deletedFlag = 0 AND p.marketState = 2
+		AND p.gradeId = 3 AND p.typeId != 4 AND p.isGoodsArea = 1
+	</select>
+	
+	<!-- 查询下架的商品是否有分销的商品 -->
+	<select id="selectStoreDistributionGoodsDto" resultType="com.topaiebiz.goods.sku.dto.StoreDistributionGoodsSkuDto">
+		SELECT id,itemId,store 
+		FROM t_dis_store_distribution_goods 
+		WHERE deletedFlag = 0 AND itemId = #{itemId}
+	</select>
+	
+	<!-- 删除分销商品 -->
+	<update id="deleteStoreDistributionGoodsSkuDtos">
+		UPDATE t_dis_store_distribution_goods SET deletedFlag = 1 
+		WHERE id = #{id}
+	</update>
+
+</mapper>

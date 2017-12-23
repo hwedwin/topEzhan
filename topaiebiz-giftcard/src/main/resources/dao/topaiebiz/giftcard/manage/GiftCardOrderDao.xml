@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.giftcard.manage.dao.GiftCardOrderDao">
+
+	<sql id="order">
+		id,memberId,orderTime,state,totalPrice,
+		number,needSend,addressId,payOrderId,memo,creatorId,
+		createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+	</sql>
+
+	<!-- 查询礼卡的订单信息 -->
+
+	<select id="selectCardOrder"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardOrderEntity">
+		SELECT
+		<include refid="order" />
+		FROM card_order WHERE deletedFlag=0;
+	</select>
+
+	<select id="selectOrderOfPage" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto">
+		SELECT
+		DISTINCT a.id AS orderId,a.id AS orderNo,a.memberId,a.orderTime,
+		a.logisticsType,a.logisticsNo,
+		a.state AS
+		orderState,a.totalPrice,a.number,a.needSend,a.payOrderId,
+		a.memo,a.creatorId,a.createdTime,a.lastModifierId,a.lastModifiedTime,
+		b.name,b.address,b.zipCode,b.telephone,b.landline,b.otherTelephone
+
+		FROM
+		t_gif_giftcard_order a
+		LEFT JOIN t_tsa_order_address b ON a.id =
+		b.orderId
+		LEFT JOIN t_gif_giftcard_detail c ON a.id=c.orderId
+		LEFT JOIN
+		t_gif_giftcard_info d ON c.cardId=d.id
+		LEFT JOIN t_tsa_total_order f ON
+		a.payOrderId=f.id
+		WHERE a.deletedFlag = 0
+		<if test="!(infoName == null || infoName =='')">
+			AND d.name = #{infoName}
+		</if>
+		<if test="!(name == null || name == '')">
+			AND b.name = #{name}
+		</if>
+		<if test="!(beganTime == null || beganTime == '')">
+			AND a.orderTime &gt;=
+			STR_TO_DATE(#{beganTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+		<if test="!(endTime == null || beganTime == '')">
+			AND a.orderTime &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d
+			%H:%i:%s')
+		</if>
+
+		<if test="orderState!=null and orderState!=3 ">
+			AND a.state=#{orderState}
+		</if>
+		<if test="orderState!=null and orderState==3">
+			AND (a.state=3 OR a.state=4)
+		</if>
+		<if test="!(memberId == null || memberId == 0)">
+			AND a.memberId=#{memberId}
+		</if>
+		ORDER BY orderTime DESC
+	</select>
+
+	<!-- 根据订单编号查询礼卡信息 -->
+	<select id="selectCardByOrderId" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		a.id AS cardId,a.rangeType,a.name AS
+		infoName,a.price,a.value,a.image,b.name AS
+		labelName,c.name AS
+		mediumName,c.id AS cardMedium,
+		a.expirationTime,a.banMemberNo,a.isVice
+		FROM
+		t_gif_giftcard_info a
+		LEFT JOIN t_gif_giftcard_label b ON
+		a.cardLabel=b.id
+		LEFT JOIN t_gif_giftcard_medium c ON a.cardMedium=c.id
+		WHERE a.id IN
+		(SELECT DISTINCT cardId FROM t_gif_giftcard_detail WHERE
+		orderId=#{orderId})
+	</select>
+
+	<!-- 查询订单中每种礼卡的数量 -->
+	<select id="selectDetailCount" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT COUNT(id) AS number
+		FROM t_gif_giftcard_detail
+		WHERE
+		orderId = #{orderId} AND cardId=#{cardId}
+	</select>
+
+	<!-- 根据订单的ID查询address集合 -->
+	<select id="selectAddressOfBeach"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardAddressEntity">
+		SELECT id FROM t_tsa_order_address WHERE orderId IN
+		<foreach collection="array" item="order" open="(" separator=","
+			close=")">
+			#{order}
+		</foreach>
+	</select>
+
+	<!-- 批量删除礼卡订单信息 -->
+	<update id="deleteOrderOfBeanch">
+		UPDATE t_gif_giftcard_order SET deletedFlag=1 WHERE id IN
+		<foreach collection="array" item="order" open="(" separator=","
+			close=")">
+			#{order}
+		</foreach>
+	</update>
+
+	<select id="selectSumNumber" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto">
+		SELECT SUM(a.number) AS sum FROM t_gif_giftcard_order a
+		LEFT JOIN
+		t_gif_giftcard_detail b ON a.id = b.orderId
+		WHERE a.memberId =
+		#{memberId} AND
+		b.cardNo = #{id}
+	</select>
+
+	<select id="selectOrderByOrderId" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		a.id AS orderId,a.id AS
+		orderNo,a.memberId,a.orderTime,
+		a.state,a.totalPrice,a.number,a.needSend,a.payOrderId,
+		a.memo,a.creatorId,a.createdTime,a.lastModifierId,a.lastModifiedTime,
+		b.name,b.districtId,b.address,b.zipCode,b.telephone,b.landline,b.otherTelephone,
+		c.price,c.value,c.mainCardId,d.totalNum,
+		d.surplusNum,d.expirationTime,d.banMemberNo,d.name AS
+		infoName,d.image,e.name AS labelName,d.id AS cardId,
+		f.name AS
+		mediumName,g.name AS
+		typeName
+		FROM
+		t_gif_giftcard_order a
+		LEFT JOIN
+		t_tsa_order_address b ON
+		a.id =
+		b.orderId
+		LEFT JOIN t_gif_giftcard_detail
+		c ON a.id = c.orderId
+		LEFT
+		JOIN t_gif_giftcard_info d ON
+		c.cardId = d.id
+		LEFT JOIN
+		t_gif_giftcard_label e ON d.cardLabel = e.id
+		LEFT JOIN
+		t_gif_giftcard_medium f ON d.cardMedium = f.id
+		LEFT JOIN
+		t_gif_giftcard_type g ON d.cardType
+		= g.id
+		WHERE a.id=#{orderId}
+	</select>
+
+	<!-- 根据订单id查询订单发票 -->
+	<select id="selectOrderInvoice" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardOrderInvoiceEntity">
+		SELECT
+		id,orderId,storeId,invoiceType,title,taxpayerNo,text,invoiceImage,
+		modeType,`name`,sum,addressTel,account,state,memo,creatorId,invoiceCode,
+		createdTime,lastModifierId,lastModifiedTime,deletedFlag,version,invoiceNum
+		from t_tsa_order_invoice
+		WHERE orderId = #{orderId}
+	</select>
+
+	<!-- 根据订单编号查询配送地址 -->
+	<select id="selectAddressByorderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardAddressEntity">
+		SELECT id,name,address,telephone,districtId FROM
+		t_tsa_order_address WHERE
+		orderId=#{orderId}
+	</select>
+
+	<!-- 根据订单编号修改订单的配送地址 -->
+	<update id="updateAddressByOrderId" parameterType="com.topaiebiz.giftcard.manage.dto.OrderAddressDto">
+		UPDATE
+		t_tsa_order_address
+		SET
+		name = #{name},
+		address = #{address},
+		districtId
+		=
+		#{districtId},
+		telephone=#{telephone}
+		WHERE orderId= #{orderId}
+	</update>
+
+	<select id="selectDeliveryByOrderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.giftcard.manage.dto.OrderAddressDto">
+		SELECT name,address,telephone FROM t_tsa_order_address
+		WHERE orderId=#{orderId}
+	</select>
+
+	<!-- 根据订单编号查询交易单号 -->
+	<select id="selectpayCallbackNoByOrderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.transaction.order.total.entity.TotalOrderEntity">
+		SELECT b.payCallbackNo FROM t_gif_giftcard_order a LEFT
+		JOIN t_tsa_total_order
+		b
+		ON a.payOrderId=b.id WHERE a.id=#{orderId}
+	</select>
+
+	<!-- 根据订单编号删除订单信息 -->
+	<update id="deleteOrderByOrderId" parameterType="java.lang.Long">
+		UPDATE
+		t_gif_giftcard_order SET deletedFlag=1 WHERE id=#{orderId}
+	</update>
+
+	<!-- 根据订单编号删除订单的配送地址信息 -->
+	<update id="deleteAddressByOrderId" parameterType="java.lang.Long">
+		UPDATE
+		t_tsa_order_address SET deletedFlag=1 WHERE orderId=#{orderId}
+	</update>
+
+	<!-- 根据订单编号和所属礼卡的ID查询礼卡的数量。 -->
+	<select id="selectCountByCardIdAndOrderId" resultType="java.lang.Long">
+		SELECT
+		COUNT(id) FROM t_gif_giftcard_detail WHERE cardId=#{arg0} AND
+		orderId=#{arg1}
+	</select>
+
+
+
+
+	<!-- 根据订单编号查询礼卡详细信息 -->
+	<select id="selectCardDetailByOrderId" parameterType="com.topaiebiz.giftcard.manage.dto.GiftCardOrderDto"
+		resultType="com.topaiebiz.giftcard.manage.dto.GiftCardDto">
+		SELECT
+		a.id AS cardId,a.name AS
+		infoName,a.price,a.value,a.image,b.name AS
+		labelName,c.name AS
+		mediumName,c.id AS cardMedium,d.id,a.platformPrice,d.memberId,
+		a.expirationTime,a.banMemberNo,a.isVice,a.rangeType
+		FROM
+		t_gif_giftcard_info a
+		LEFT
+		JOIN t_gif_giftcard_label b ON
+		a.cardLabel=b.id
+		LEFT JOIN
+		t_gif_giftcard_medium c ON a.cardMedium=c.id
+		LEFT JOIN
+		t_gif_giftcard_detail d ON d.cardId=a.id
+		WHERE
+		d.orderId=#{orderId}
+	</select>
+
+	<select id="selectMediumByOrderId" parameterType="java.lang.Long"
+		resultType="com.topaiebiz.giftcard.manage.entity.CardInfoEntity">
+		SELECT DISTINCT b.cardMedium FROM t_gif_giftcard_detail a
+		LEFT JOIN t_gif_giftcard_info b ON a.cardId=b.id
+		WHERE
+		a.orderId=#{orderId}
+	</select>
+</mapper>

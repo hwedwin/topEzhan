@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.settlement.member.dao.MemberWithdrawalLogDao">
+
+	<!-- 查询会员已提现金额 -->
+	<select id="selectWithdrawalSum" resultType="Double">
+		SELECT
+		sum(withdrawalSum)
+		FROM
+		t_set_member_withdrawal_log
+		WHERE
+		deletedFlag = 0 AND memberId = #{memberId} GROUP BY memberId
+	</select>
+	
+	<!-- 根据会员id查询会员信息 -->
+	<select id ="selectMemberByMemberId" resultType="com.topaiebiz.member.mgmt.entity.MemberEntity">
+		SELECT id,userName from t_mem_member 
+		WHERE id = #{memberId} AND deletedFlag = 0
+	</select>
+
+</mapper>

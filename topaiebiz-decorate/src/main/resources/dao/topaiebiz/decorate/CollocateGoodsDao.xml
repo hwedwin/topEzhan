@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.decorate.dao.CollocateGoodsDao">
+	
+	<!-- 根据类型，查询详情 取15条-->
+	<select id="selectListByType" resultType="com.topaiebiz.decorate.entity.CollocateGoodsEntity">
+		SELECT
+			 id,collocateTypeId,goodsId,sortNo,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+		FROM 
+			 t_dec_collocate_goods
+		WHERE 
+			 deletedFlag=0 and collocateTypeId=#{collocateTypeId} 
+	    ORDER BY 
+	         sortNo 
+	    LIMIT 
+	    	 15
+	</select>
+	
+	<!-- 根据类型，查询详情 所有-->
+	<select id="selectAllListByType" resultType="com.topaiebiz.decorate.entity.CollocateGoodsEntity">
+		SELECT
+			 id,collocateTypeId,goodsId,sortNo,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version
+		FROM 
+			 t_dec_collocate_goods
+		WHERE 
+			 deletedFlag=0 and collocateTypeId=#{collocateTypeId} 
+	    ORDER BY 
+	         sortNo 
+	</select>
+	
+</mapper>

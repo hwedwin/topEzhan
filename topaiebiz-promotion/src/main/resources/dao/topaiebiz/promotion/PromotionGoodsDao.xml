@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.promotion.mgmt.dao.PromotionGoodsDao">
+
+	<!-- 根据营销活动ID和商品sku查询营销活动商品信息（关联sku表） -->
+	<select id="getPromotionGoods" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		g.itemId,
+		g.promotionId,
+		g.goodsSkuId,
+		s.price,
+		g.promotionPrice,
+		g.confineNum,
+		g.discountType,
+		g.discountValue,
+		s.price - g.promotionPrice preferentialAmount
+		FROM
+		t_pro_promotion_goods g
+		LEFT JOIN t_goo_goods_sku s ON g.goodsSkuId = s.id
+		WHERE s.deletedFlag = 0
+		<if test="!(promotionId==null or promotionId=='')">
+			AND promotionId = #{promotionId}
+		</if>
+		<if test="!(goodsSkuId==null or goodsSkuId=='')">
+			AND goodsSkuId = #{goodsSkuId}
+		</if>
+	</select>
+
+	<!-- 根据营销活动ID删除对应活动商品 -->
+	<select id="deletePromotionGoods">
+		DELETE FROM t_pro_promotion_goods WHERE promotionId = #{promotionId}
+	</select>
+
+	<!-- 根据营销活动ID和商品sku查询活动商品信息 -->
+	<select id="selectPromotionGoodsByPromotionId" resultType="com.topaiebiz.promotion.mgmt.entity.PromotionGoodsEntity">
+		SELECT
+		id,
+		promotionId,
+		storeId,
+		itemId,
+		goodsSkuId,
+		repertoryNum,
+		promotionNum,
+		promotionPrice,
+		confineNum,
+		discountType,
+		discountValue,
+		giveawayGoods,
+		platformPrice,
+		state,
+		memo
+		FROM
+		t_pro_promotion_goods
+		WHERE
+		promotionId = #{promotionId} AND goodsSkuId = #{goodsSkuId}
+	</select>
+
+	<!-- 根据营销活动id查询所选商品(根据item去重) -->
+	<select id="findPromotionGoodsByPromotionId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT DISTINCT
+		g.itemId ,i.itemCode,i.name as goodsName,i.defaultPrice as goodsPrice
+		FROM
+		t_pro_promotion_goods g
+		LEFT JOIN t_goo_item i ON g.itemId = i.id
+		WHERE
+		g.promotionId = #{promotionId}
+		<if test="(belongStore==null or belongStore=='')">
+			AND g.storeId IS NULL
+		</if>	
+		<if test="!(belongStore==null or belongStore=='')">
+			AND g.storeId = #{belongStore}
+		</if>	
+		<if test="!(itemCode==null or itemCode=='')">
+			AND i.itemCode = #{itemCode}
+		</if>
+		<if test="!(name==null or name=='')">
+			AND i.name = #{name}
+		</if>
+		<if test="!(ageId==null or ageId=='')">
+			AND i.ageId = #{ageId}
+		</if>
+		<if test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND i.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND i.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND i.belongBrand = #{belongBrand}
+		</if>
+		ORDER BY
+		<if test="price == 0">
+			i.defaultPrice DESC,
+		</if>
+		<if test="price == 1">
+			i.defaultPrice,
+		</if>
+		i.itemCode
+	</select>
+
+	<!-- 根据营销活动ID和itemId查询活动商品信息 -->
+	<select id="selectPromotionGoodsByItemId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		id,
+		promotionId,
+		storeId,
+		itemId,
+		goodsSkuId,
+		repertoryNum,
+		promotionNum,
+		promotionPrice,
+		confineNum,
+		discountType,
+		discountValue,
+		giveawayGoods,
+		platformPrice,
+		state,
+		memo
+		FROM
+		t_pro_promotion_goods
+		WHERE
+		deletedFlag = 0
+		AND promotionId = #{promotionId} AND itemId = #{itemId}
+	</select>
+
+	<select id="selectPromotionGoodsByPromotionIdAndItemid" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		g.id,
+		g.goodsSkuId,
+		s.saleFieldValue as saleFieldValue,
+		s.price as goodsPrice,
+		g.promotionPrice,
+		g.promotionNum,
+		g.confineNum
+		FROM
+		t_pro_promotion_goods g
+		LEFT JOIN t_goo_goods_sku s ON g.goodsSkuId = s.id
+		WHERE g.deletedFlag = 0 AND g.promotionId = #{promotionId} AND g.itemId = #{itemId}
+	</select>
+
+	<select id="selectPromotionGoodsList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		id,
+		promotionId,
+		storeId,
+		itemId,
+		goodsSkuId,
+		repertoryNum,
+		promotionNum,
+		promotionPrice,
+		confineNum,
+		discountType,
+		discountValue,
+		giveawayGoods,
+		platformPrice,
+		state,
+		memo
+		FROM
+		t_pro_promotion_goods
+		WHERE
+		deletedFlag = 0
+		<if test="!(promotionId==null or promotionId=='')">
+			AND promotionId = #{promotionId}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND storeId = #{storeId}
+		</if>
+		UNION
+		SELECT
+		p.id,
+		p.promotionId,
+		p.storeId,
+		p.itemId,
+		p.goodsSkuId,
+		p.repertoryNum,
+		p.promotionNum,
+		p.promotionPrice,
+		p.confineNum,
+		p.discountType,
+		p.discountValue,
+		p.giveawayGoods,
+		p.platformPrice,
+		p.state,
+		p.memo
+		FROM
+		t_pro_promotion_goods p
+		LEFT JOIN t_dis_store_distribution_goods d ON p.itemId = d.itemId
+		WHERE
+		d.deletedFlag = 0
+		<if test="!(promotionId==null or promotionId=='')">
+			AND p.promotionId = #{promotionId}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND d.store = #{storeId}
+		</if>
+	</select>
+
+	<!-- 取消活动商品 -->
+	<select id="deleteGoods">
+		DELETE FROM t_pro_promotion_goods WHERE promotionId = #{promotionId} AND itemId = #{itemId}
+	</select>
+
+
+	<select id="selectPromotionCouponGoods" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT DISTINCT
+		g.itemId ,i.itemCode,i.name as goodsName,i.defaultPrice
+		as goodsPrice,i.createdTime
+		FROM
+		t_pro_promotion_goods g
+		LEFT JOIN t_goo_item i ON g.itemId = i.id
+		WHERE g.deletedFlag = 0
+		AND promotionId = #{promotionId}
+		<if test="!(itemCode==null or itemCode=='')">
+			AND i.itemCode = #{itemCode}
+		</if>
+		<if test="!(name==null or name=='')">
+			AND i.name = #{name}
+		</if>
+		<if test="!(ageId==null or ageId=='')">
+			AND i.ageId = #{ageId}
+		</if>
+		<if test="!(priceRangeLeft==null or priceRangeLeft=='' or priceRangeLeft==0)">
+			AND i.defaultPrice >= #{priceRangeLeft}
+		</if>
+		<if test="!(priceRangeRigth==null or priceRangeRigth=='' or priceRangeRigth==0)">
+			AND i.defaultPrice &lt;= #{priceRangeRigth}
+		</if>
+		<if test="!(belongBrand==null or belongBrand == '')">
+			AND i.belongBrand = #{belongBrand}
+		</if>
+		ORDER BY
+		<if test="price == 0">
+			i.defaultPrice DESC,
+		</if>
+		<if test="price == 1">
+			i.defaultPrice,
+		</if>
+		i.createdTime DESC
+	</select>
+
+	<!-- 根据商品sku编号查询所属营销活动 (单品级) -->
+	<select id="findPromotionSingleByGoodsSkuId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		g.id,
+		p. NAME,
+		p.gradeId,
+		p.typeId,
+		p.description,
+		g.promotionId,
+		g.storeId,
+		g.itemId,
+		g.goodsSkuId,
+		g.repertoryNum,
+		g.promotionNum,
+		g.promotionPrice,
+		g.confineNum,
+		g.discountType,
+		g.discountValue,
+		p.marketState
+		FROM
+		t_pro_promotion_goods g
+		LEFT JOIN t_pro_promotion p ON p.id = g.promotionId
+		WHERE g.deletedFlag = 0 AND p.deletedFlag = 0 
+		AND p.marketState = 2 AND p.gradeId = 1
+		<if test="!(goodsSkuId==null or goodsSkuId=='')">
+			AND g.goodsSkuId = #{goodsSkuId}
+		</if>
+	</select>
+
+	<!-- 根据活动id查询活动商品(不分页) -->
+	<select id="selectAllPromotionGoodsList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+		id,
+		promotionId,
+		storeId,
+		itemId,
+		goodsSkuId,
+		repertoryNum,
+		promotionNum,
+		promotionPrice,
+		confineNum,
+		discountType,
+		discountValue,
+		giveawayGoods,
+		platformPrice,
+		state,
+		memo
+		FROM
+		t_pro_promotion_goods
+		WHERE deletedFlag = 0 AND promotionId = #{promotionId}
+	</select>
+
+	<!-- 根据商品SkuId和营销活动id删除信息 -->
+	<select id="deleteGoodsByGoodsSkuIdAndPromotionId">
+		DELETE FROM t_pro_promotion_goods WHERE goodsSkuId = #{goodsSkuId} AND promotionId = #{promotionId}
+	</select>
+	
+	<!-- 根据活动id和店铺id查询商品信息 -->
+	<select id = "selectGoodsByPromotionIdAndStoreId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT id,promotionId,storeId,itemId,goodsSkuId,repertoryNum,promotionNum,promotionPrice,confineNum,discountType,discountValue,giveawayGoods,platformPrice,state FROM t_pro_promotion_goods WHERE deletedFlag = 0 
+		AND promotionId = #{promotionId} AND storeId = #{storeId}
+	</select>
+	
+	<!-- 商家报名商品 -->
+	<select id = "selectStoreEnrolGoodsList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+	
+		SELECT DISTINCT
+			g.itemId ,i.itemCode,i.name as goodsName,i.defaultPrice as goodsPrice,g.state
+		FROM t_pro_promotion_goods g
+		LEFT JOIN t_goo_item i ON g.itemId = i.id
+		WHERE g.promotionId = #{promotionId} AND g.storeId = #{storeId}
+		<if test="!(state==null or state=='')">
+			AND g.state = #{state}
+		</if>
+	
+	</select>
+	
+	<!-- 根据活动id,店铺id,itemId查询sku商品信息 -->
+	<select id = "selectGoodsByPromotionIdAndStoreIdAndItemId" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+		SELECT
+			id,
+			promotionId,
+			storeId,
+			itemId,
+			goodsSkuId,
+			repertoryNum,
+			promotionNum,
+			promotionPrice,
+			confineNum,
+			discountType,
+			discountValue,
+			giveawayGoods,
+			platformPrice,
+			state,
+			memo
+		FROM
+			t_pro_promotion_goods WHERE deletedFlag = 0
+			AND promotionId = #{promotionId}
+		AND storeId = #{storeId} AND itemId = #{itemId}
+	
+	</select>
+	
+	<!-- 报名商家商品审核列表(分页查询) -->
+	<select id = "selectStoreGoodsAuditList" resultType="com.topaiebiz.promotion.mgmt.dto.PromotionGoodsDto">
+	SELECT DISTINCT g.itemId ,i.itemCode,i.name as goodsName,i.defaultPrice as goodsPrice
+		FROM t_pro_promotion_goods g
+		LEFT JOIN t_goo_item i ON g.itemId = i.id
+		WHERE g.deletedFlag = 0 AND i.deletedFlag = 0
+		<if test="!(promotionId==null or promotionId=='')">
+			AND g.promotionId = #{promotionId}
+		</if>
+		<if test="!(storeId==null or storeId=='')">
+			AND g.storeId = #{storeId}
+		</if>
+		<if test="!(itemCode==null or itemCode=='')">
+			AND i.itemCode = #{itemCode}
+		</if>
+		<if test="!(goodsName==null or goodsName=='')">
+			AND i.name = #{goodsName}
+		</if>
+	</select>
+	
+</mapper>

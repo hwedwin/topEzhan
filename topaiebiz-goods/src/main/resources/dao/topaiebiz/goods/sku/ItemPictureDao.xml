@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.goods.sku.dao.ItemPictureDao">
+  	
+  	<!-- 逻辑删除商品图片信息 -->
+  	<update id="deleteItemPicture">
+  		UPDATE t_goo_item_picture SET deletedFlag = 1 WHERE id = #{id}
+  	</update>
+  	
+  	<!-- 查询商品item的图片 -->
+  	<select id="selectItemPicture" resultType="com.topaiebiz.goods.sku.entity.ItemPictureEntity">
+  		SELECT id,itemId,name,type,isMain FROM t_goo_item_picture 
+  		WHERE itemId = #{itemId} AND deletedFlag = 0
+  	</select>
+  	
+  	<!-- 根据id查询商品图片 -->
+  	<select id="selectItemPictureById" resultType="com.topaiebiz.goods.sku.dto.ItemPictureDto">
+  		SELECT id,itemId,name,type,isMain FROM t_goo_item_picture 
+  		WHERE itemId = #{itemId} AND deletedFlag = 0
+  	</select>
+	
+</mapper>

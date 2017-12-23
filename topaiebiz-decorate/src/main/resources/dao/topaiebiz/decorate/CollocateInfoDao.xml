@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.topaiebiz.decorate.dao.CollocateInfoDao">
+	
+	<select id="selectByCollocateTypeAndSortNo" resultType="com.topaiebiz.decorate.entity.CollocateInfoEntity">
+		SELECT
+			id,collocateType,image,jumpType,jumpId,jumpUrl,sortNo,memo,creatorId,createdTime,lastModifierId,lastModifiedTime,deletedFlag,version 
+		FROM 
+			t_dec_collocate_info 
+		WHERE 
+			deletedFlag=0 and sortNo=#{sortNo} and collocateType=#{collocateType}
+	</select>
+	
+	<!-- 根据类型，查询详情 -->
+	<select id="selectListByType" resultType="com.topaiebiz.decorate.dto.CollocateInfoDto">
+		SELECT
+			* 
+		FROM 
+			t_dec_collocate_info 
+		WHERE 
+			deletedFlag=0 and collocateType=#{collocateType} 
+	    ORDER BY 
+	        sortNo 
+	</select>
+
+</mapper>
